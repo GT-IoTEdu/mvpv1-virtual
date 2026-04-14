@@ -26,15 +26,7 @@ Este guia detalha o processo completo de instalação do sistema do zero, inclui
 
   
 
-- ✅ Python 3.9+ instalado
-
-- ✅ MySQL/MariaDB instalado e rodando
-
-- ✅ pfSense configurado com API REST v2 habilitada
-
-- ✅ Acesso ao banco de dados MySQL
-
-- ✅ Acesso ao pfSense (interface web e API)
+ 
 
   
 
@@ -42,51 +34,16 @@ Este guia detalha o processo completo de instalação do sistema do zero, inclui
 
   
 
-### 1.1. Criar Banco de Dados Vazio
+###  Opcional: Usar um ambiente virtual
 
-  
-
-```sql
-
--- Conectar ao MySQL como root
-
-mysql -u root -p
-
-  
-
--- Criar banco de dados
-
-CREATE  DATABASE  iot_edu  CHARACTER  SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-  
-
--- Criar usuário
-
-CREATE  USER 'IoT_EDU'@'localhost' IDENTIFIED BY  'sua_senha_aqui';
-
-  
-
--- Dar permissões
-
-GRANT ALL PRIVILEGES ON iot_edu.* TO  'IoT_EDU'@'localhost';
-
-FLUSH PRIVILEGES;
-
-  
-
--- Verificar
-
-SHOW DATABASES;
-
-USE iot_edu;
-
-SHOW TABLES; -- Deve estar vazio
-
+```bash
+pip install virtualenv
+python3 -m venv venv
+source venv/bin/activate
 ```
 
   
-
-### 1.2. Configurar Variáveis de Ambiente
+### 1.1. Configurar Variáveis de Ambiente
 
   
 
@@ -122,6 +79,9 @@ GOOGLE_CLIENT_ID=seu_client_id
 
 GOOGLE_CLIENT_SECRET=seu_client_secret
 
+IDS_SSE_TLS_VERIFY=False
+AUTH_STRICT_SESSION=False
+
 # Superusuário
 
 SUPERUSER_ACCESS=seu_email@gmail.com
@@ -130,45 +90,40 @@ SUPERUSER_ACCESS=seu_email@gmail.com
 
   
 
-### 1.3. Instalar Dependências
+### 1.2. Instalar Dependências
 
   
 
 ```bash
-
-cd  backend
-
+ 
 pip  install  -r  requirements.txt
 
 ```
 
   
 
-## 📊 Passo 2: Criar Estrutura do Banco de Dados
+## 📊 Passo 2: Configurar o pfsense
 
   
 
 ```bash
 
-# Script unificado que detecta automaticamente se é instalação do zero
+# Esse script criara uma interface virtual tap0 que sera utilizada na configuração do pfsense
 
-python  -m  db.setup_database
+configurar_rede.sh
 
 ```
 
-  
+### 2.1. Instalar o Virtualbox
+Para instalar o virtualbox acesse https://www.virtualbox.org/wiki/Downloads e escolha o seu OS.
 
-**O que este script faz:**
+### 2.2. Instale a imagem do pfsense
+Este arquivo detalha os passos de instalação do pfsense e alternativamente uma imagem pronta para o virtualbox [Instalacao_PFSense.pdf](https://github.com/user-attachments/files/26728713/Instalacao_PFSense.pdf)
 
-- ✅ Detecta se o banco está vazio (instalação do zero)
+### 2.3. Trocar no Virtualbox para que a interface 2 do pfSense seja a tap0 no modo bridge
+![Configuração da interface de clientes como Bridge](diagramas/images/pfsense_bridge2.png)
 
-- ✅ Se for instalação do zero: cria todas as tabelas com estrutura completa (incluindo todos os campos e índices)
-
-- ✅ Se for atualização: executa apenas as migrações necessárias
-
-- ✅ Cria automaticamente todos os campos (`institution_id`, `permission`, `is_active`, etc.)
-
-- ✅ Cria automaticamente todos os índices (incluindo índices únicos compostos)
+ 
 
   
 
