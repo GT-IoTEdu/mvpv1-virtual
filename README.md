@@ -151,12 +151,47 @@ O ip escolhido é um exemplo
 
 <img width="940" height="276" alt="image" src="https://github.com/user-attachments/assets/2c128d34-e6e2-4162-ab50-f21ea5e7af85" />
 
+ ## 📊 Passo 3: Instanciar a rede docker
+
+ ### 3.1 faça o deploy da rede
+ ```bash
+./deploy.sh
+```
+### 3.2 abra outro terminal e execute 
+ ```bash
+cd ids-log-monitor/
+uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
+
+```
  
+ ## 📊 Passo 4: Configurar atacante e alvo
+ ### 4.1 Acesse o localhost 3000
+ <img width="1021" height="690" alt="image" src="https://github.com/user-attachments/assets/c2870ebc-1e5d-440c-9d13-044abba012c1" />
 
-  
+### 4.2 Faça o login via conta google com o super usuário registrado no env
+<img width="1021" height="738" alt="image" src="https://github.com/user-attachments/assets/8574ccfc-81e0-4e09-82ca-a10a2a972fb8" />
 
+### 4.3 Va até a aba de administrador e cadastre sua rede: 
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/fcbab1bd-a8af-4cd1-8ce7-0a9fb9edd90b" />
+os campos do zeek e suricata são os mesmo com o url sendo: http://host.docker.internal:8001 e chave: a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
  
+### 4.4 Faça login com uma conta diferente e selecione a instituição que você cadastrou 
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/c1e40bf4-d0fd-4e72-972e-04adbfb74dcb" />
 
-  
+### 4.5 Volte para o user usuário e torne este usuário um administrador
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/317800e7-b3c9-4681-a288-5d18bf3bb75d" />
 
- 
+### 4.6 Como adiministrador sincronize as regras e mapamento
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/ac7691a8-8a59-45ac-b09b-e5388e4dc75b" />
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/2d252067-64cd-421f-a7f4-56c7d3e42102" />
+
+### 4.7 utilize uma conta comun para cadastrar os seguintes macs estaticos
+<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/e7ec4695-d54b-4508-b2e2-2674ef3ee3b1" />
+92:d0:c6:0a:29:32 e 92:d0:c6:0a:29:33 escolha o nome e descrição que preferir
+
+### 4.8 Instancie os ataque e alvo utilizando o script
+ ```bash
+deploy_atacante-alvo.sh
+```
+
+### 4.9 Monitore a aba de dispositivos bloqueados e incidentes de segurança
