@@ -1,0 +1,3 @@
+# IPv6 NS Flood
+# Neighbor Solicitation flood para ff02::1 (all-nodes multicast)
+alert ipv6 any any -> ff02::1 any (msg:"ATAQUE -> IPv6 NS Flood (Neighbor Solicitation para ff02::1)"; flow:stateless; detection_filter:track by_dst, count 80, seconds 5;sid:1009609; rev:2;)

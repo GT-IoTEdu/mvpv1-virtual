@@ -1,0 +1,9 @@
+# ========================================
+# SQL Injection Attack
+
+# SQLi - SELECT
+alert http any any -> any any (msg:"LOCAL SQLi attempt - classic keywords"; content:"select"; nocase; http_uri; sid:1000005; rev:1;)
+# SQLi - OR 1==1
+alert http any any -> any any (msg:"LOCAL SQLi attempt - OR 1=1"; content:"or 1=1"; nocase; http_uri; sid:1000006; rev:1;)
+# SQLi - Comment Sequence
+alert http any any -> any any (msg:"LOCAL SQLi attempt - comment sequence"; content:"--"; http_uri; sid:1000007; rev:1;)

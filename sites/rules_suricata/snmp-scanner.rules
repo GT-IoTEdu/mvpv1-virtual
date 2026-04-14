@@ -1,0 +1,9 @@
+# ========================================
+# SNMP Scanner Attack
+# ========================================
+
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (Alta Frequencia UDP 161)"; detection_filter:track by_src, count 3, seconds 5; sid:1009633; rev:2;)
+
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (Community Strings Comuns)"; pcre:"/(public|private|secret|snmp|snmpd|snmptrap|system|sys|admin|root|manager|monitor|agent_steal|all|rw|rwa|write|read|readwrite|test|test2|tech|security|superuser)/i"; detection_filter:track by_src, count 3, seconds 5; sid:1009634; rev:2;)
+
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (GetRequest Burst)"; content:"|A0|"; detection_filter:track by_src, count 3, seconds 5; sid:1009635; rev:1;)

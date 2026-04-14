@@ -1,0 +1,2 @@
+# ICMP Flood Detection
+alert icmp any any -> $HOME_NET any (msg:"ICMP Flood"; itype:8; detection_filter:track by_dst, count 20, seconds 10; sid:10000113; rev:1;)

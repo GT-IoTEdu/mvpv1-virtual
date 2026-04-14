@@ -1,0 +1,16 @@
+# ========================================
+# Zenoh Pico Timestamp Manipulation
+# ========================================
+# O ataque envia frames UDP com byte de controle 0xA0
+# (Z_MSG_FRAME=0x00 | Z_FLAG_RELIABLE=0x20 | Z_FLAG_EXTENSIONS=0x80)
+# para a porta 7447/UDP (protocolo Zenoh), incluindo uma extensão de
+# timestamp (Z_EXT_TIMESTAMP=0x01) com valores manipulados (futuro +1 ano,
+# passado -1 ano, zero, máximo, microsegundos alterados) para causar
+# problemas de ordenação no roteador Zenoh (eclipse/zenoh).
+# Origem: 4 threads × ~1000 frames/s (usleep 1ms entre envios).
+
+# Frame Zenoh com flag de extensões + payload de timestamp manipulado
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Timestamp Manipulation (frame com extensoes)"; content:"|A0|"; depth:1; content:"TIMESTAMP_MANIPULATED"; classtype:attempted-dos; sid:1000219; rev:1;)
+
+# Flood volumétrico de frames Zenoh com extensões (0xA0)
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Timestamp Manipulation (flood volumetrico)"; content:"|A0|"; depth:1; detection_filter:track by_src, count 100, seconds 5; classtype:attempted-dos; sid:1000220; rev:1;)

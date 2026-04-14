@@ -1,0 +1,85 @@
+# ===========================================================================
+# Arquivo  : port-scanner.rules (Suricata)
+# Descricao: Deteccao de port scanners (aggressive, os, tcp, udp, vuln)
+# Padrao   : GT-IoTEdu Suricata 8.x
+# SIDs     : 2910001 – 2910055
+# v2       : mDNS removida (FP multicast legitimo)
+#            flow:to_server adicionado em todas flags:S (warning Suricata 8)
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# [1] iotedu-attack-port-scanner-aggressive
+# ---------------------------------------------------------------------------
+
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Aggressive - TCP NULL flags"; flags:0; classtype:network-scan; sid:2910001; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Aggressive - TCP XMAS scan FIN+PSH+URG"; flags:FPU; classtype:network-scan; sid:2910002; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Aggressive - TCP FIN sem ACK"; flags:F,12; classtype:network-scan; sid:2910003; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Aggressive - TCP SYN window zero"; flow:to_server; flags:S,12; window:0; classtype:network-scan; sid:2910004; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Aggressive - SYN rate alto 50 em 5s"; flow:to_server; flags:S,12; threshold: type threshold, track by_src, count 50, seconds 5; classtype:network-scan; sid:2910005; rev:2;)
+
+
+# ---------------------------------------------------------------------------
+# [2] iotedu-attack-port-scanner-os
+# ---------------------------------------------------------------------------
+
+alert icmp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - ICMP timestamp request fingerprint"; itype:13; classtype:attempted-recon; sid:2910010; rev:2;)
+alert icmp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - ICMP address mask request fingerprint"; itype:17; classtype:attempted-recon; sid:2910011; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - TCP URG+PSH probe fingerprint"; flags:UP; classtype:attempted-recon; sid:2910012; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - TCP SYN+URG invalido fingerprint"; flags:SU; classtype:attempted-recon; sid:2910013; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - TCP SYN+FIN invalido RFC793"; flags:SF; classtype:attempted-recon; sid:2910014; rev:2;)
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN OS - TCP SYN+RST invalido fingerprint"; flags:SR; classtype:attempted-recon; sid:2910015; rev:2;)
+
+
+# ---------------------------------------------------------------------------
+# [3] iotedu-attack-port-scanner-tcp
+# ---------------------------------------------------------------------------
+
+alert tcp any any -> $HOME_NET any (msg:"GT-IoTEdu SCAN TCP - FIN+SYN flags invalidas RFC793"; flags:FS,12; classtype:network-scan; sid:2910022; rev:2;)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"GT-IoTEdu SCAN TCP - RST flood saindo portas fechadas"; flags:R,12; threshold: type threshold, track by_dst, count 30, seconds 5; classtype:network-scan; sid:2910023; rev:2;)
+
+
+# ---------------------------------------------------------------------------
+# [4] iotedu-attack-port-scanner-udp
+# mDNS (5353) removida — multicast legitimo da rede local
+# TFTP e SNMP mantidos — raramente legitimos vindos de externo
+# ---------------------------------------------------------------------------
+
+alert udp $EXTERNAL_NET any -> $HOME_NET 161 (msg:"GT-IoTEdu SCAN UDP - SNMP probe externo porta 161"; content:"|30|"; classtype:attempted-recon; sid:2910030; rev:2;)
+alert udp $EXTERNAL_NET any -> $HOME_NET 69 (msg:"GT-IoTEdu SCAN UDP - TFTP probe externo porta 69"; classtype:attempted-recon; sid:2910032; rev:2;)
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (msg:"GT-IoTEdu SCAN UDP - ICMP port-unreachable flood saindo"; itype:3; icode:3; threshold: type threshold, track by_dst, count 20, seconds 10; classtype:network-scan; sid:2910035; rev:2;)
+#alert udp $EXTERNAL_NET any -> $HOME_NET 1900 (msg:"GT-IoTEdu SCAN UDP - SSDP M-SEARCH externo porta 1900"; content:"M-SEARCH"; nocase; threshold: type both, track by_src, count 20, seconds 10; classtype:attempted-recon; sid:2910033; rev:3;)
+
+# ---------------------------------------------------------------------------
+# [5] iotedu-attack-port-scanner-vulnerabilities
+# ---------------------------------------------------------------------------
+
+# HTTP scanners
+alert http $EXTERNAL_NET any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Vuln - HTTP Nikto scanner"; flow:to_server,established; http.user_agent; content:"Nikto"; nocase; classtype:attempted-recon; sid:2910040; rev:2;)
+alert http $EXTERNAL_NET any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Vuln - HTTP masscan scanner"; flow:to_server,established; http.user_agent; content:"masscan"; nocase; classtype:attempted-recon; sid:2910041; rev:2;)
+alert http $EXTERNAL_NET any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Vuln - HTTP zgrab scanner"; flow:to_server,established; http.user_agent; content:"zgrab"; nocase; classtype:attempted-recon; sid:2910042; rev:2;)
+alert http $EXTERNAL_NET any -> $HOME_NET any (msg:"GT-IoTEdu SCAN Vuln - HTTP nuclei scanner"; flow:to_server,established; http.user_agent; content:"nuclei"; nocase; classtype:attempted-recon; sid:2910043; rev:2;)
+
+# SSH banner grab
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg:"GT-IoTEdu SCAN Vuln - SSH banner grab externo porta 22"; flow:to_server,established; content:"SSH-"; classtype:attempted-recon; sid:2910044; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 2222 (msg:"GT-IoTEdu SCAN Vuln - SSH banner grab externo porta 2222"; flow:to_server,established; content:"SSH-"; classtype:attempted-recon; sid:2910045; rev:2;)
+
+# Telnet externo com flow:to_server e threshold
+alert tcp $EXTERNAL_NET any -> $HOME_NET 23 (msg:"GT-IoTEdu SCAN Vuln - Telnet probe externo porta 23"; flow:to_server; flags:S,12; threshold: type threshold, track by_src, count 5, seconds 60; classtype:attempted-recon; sid:2910046; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 2323 (msg:"GT-IoTEdu SCAN Vuln - Telnet probe externo porta 2323"; flow:to_server; flags:S,12; threshold: type threshold, track by_src, count 5, seconds 60; classtype:attempted-recon; sid:2910047; rev:2;)
+
+# SMB, FTP, RDP, IoT admin — flow:to_server em todas flags:S
+alert tcp $EXTERNAL_NET any -> $HOME_NET 445 (msg:"GT-IoTEdu SCAN Vuln - SMB probe externo porta 445"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910048; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 139 (msg:"GT-IoTEdu SCAN Vuln - SMB probe externo porta 139"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910049; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg:"GT-IoTEdu SCAN Vuln - FTP probe externo porta 21"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910050; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3389 (msg:"GT-IoTEdu SCAN Vuln - RDP probe externo porta 3389"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910051; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8443 (msg:"GT-IoTEdu SCAN Vuln - IoT admin HTTPS externo 8443"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910052; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8888 (msg:"GT-IoTEdu SCAN Vuln - IoT admin probe externo 8888"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910053; rev:2;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 1883 (msg:"GT-IoTEdu SCAN Vuln - MQTT probe externo porta 1883"; flow:to_server; flags:S,12; classtype:attempted-recon; sid:2910054; rev:2;)
+
+# SNMP community string padrao
+alert udp $EXTERNAL_NET any -> $HOME_NET 161 (msg:"GT-IoTEdu SCAN Vuln - SNMP community public externo"; content:"public"; classtype:attempted-recon; sid:2910055; rev:2;)
+
+# ===========================================================================
+# FIM — SIDs 2910001–2910055  |  rev:2
+# ===========================================================================

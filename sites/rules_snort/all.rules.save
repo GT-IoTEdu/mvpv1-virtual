@@ -1,0 +1,8 @@
+# Adicione o prefixo 'rules/' se os arquivos estiverem na mesma pasta
+include rules/local.rules
+include rules/brute-force-ssh.rules
+include rules/dns-tunneling.rules
+include rules/dos-http.rules
+include rules/ping-flood.rules
+
+include rules/sql-injection.rules

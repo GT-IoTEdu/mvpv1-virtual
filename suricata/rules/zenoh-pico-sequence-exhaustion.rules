@@ -1,0 +1,14 @@
+# ========================================
+# Zenoh Pico Sequence Exhaustion
+# ========================================
+# O ataque envia rajadas de frames UDP pequenos com byte de controle 0x20
+# (Z_MSG_FRAME=0x00 | Z_FLAG_RELIABLE=0x20) para a porta 7447/UDP (protocolo
+# Zenoh), incrementando os números de sequência em grandes saltos (10K-100K),
+# esgotando o espaço de rastreamento do roteador Zenoh (eclipse/zenoh).
+# Origem: 4 threads × 100 frames/lote, payloads pequenos (<512 bytes).
+
+# Alta frequência de frames Zenoh pequenos (byte 0x20 + payload pequeno)
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Sequence Exhaustion (alta frequencia)"; content:"|20|"; depth:1; dsize:<512; detection_filter:track by_src, count 50, seconds 5; classtype:attempted-dos; sid:1000217; rev:1;)
+
+# Flood volumétrico de frames Zenoh pequenos
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Sequence Exhaustion (flood volumetrico)"; content:"|20|"; depth:1; dsize:<512; detection_filter:track by_src, count 300, seconds 5; classtype:attempted-dos; sid:1000218; rev:1;)

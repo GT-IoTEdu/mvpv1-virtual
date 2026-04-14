@@ -1,0 +1,74 @@
+# Web Wide Scanner Detection - paths e padrões genéricos de varredura
+# Otimizado para Suricata 8.0.4 - SEM ERROS
+
+# Admin path access attempts
+alert http any any -> $HOME_NET any (msg:"SCAN Admin Path Probe"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/admin"; nocase; sid:10000310; rev:2;)
+
+# PHP Info enumeration
+alert http any any -> $HOME_NET any (msg:"SCAN PHPInfo Probe"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"phpinfo"; nocase; sid:10000311; rev:2;)
+
+# Path traversal attempts
+alert http any any -> $HOME_NET any (msg:"SCAN etc/passwd Path Traversal"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"etc/passwd"; nocase; sid:10000312; rev:2;)
+
+# Environment file access
+alert http any any -> $HOME_NET any (msg:"SCAN .env File Probe"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/.env"; sid:10000313; rev:2;)
+
+# WordPress config access
+alert http any any -> $HOME_NET any (msg:"SCAN wp-config Probe"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"wp-config"; nocase; sid:10000314; rev:2;)
+
+# Backup file enumeration - .backup extension
+alert http any any -> $HOME_NET any (msg:"SCAN Backup .backup File"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".backup"; nocase; sid:10000315; rev:2;)
+
+# Backup file enumeration - .bak extension
+alert http any any -> $HOME_NET any (msg:"SCAN Backup .bak File"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".bak"; nocase; sid:10000316; rev:2;)
+
+# Backup file enumeration - .sql extension
+alert http any any -> $HOME_NET any (msg:"SCAN Backup .sql File"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".sql"; nocase; sid:10000317; rev:2;)
+
+# Backup file enumeration - .zip extension
+alert http any any -> $HOME_NET any (msg:"SCAN Backup .zip File"; flow:to_server,established; http.method; content:"GET"; http.uri; content:".zip"; nocase; sid:10000318; rev:2;)
+
+# Common scanning tools detection - nikto
+alert http any any -> $HOME_NET any (msg:"SCAN Tool nikto Detected"; flow:to_server; http.user_agent; content:"nikto"; nocase; sid:10000320; rev:2;)
+
+# Common scanning tools detection - nmap
+alert http any any -> $HOME_NET any (msg:"SCAN Tool nmap Detected"; flow:to_server; http.user_agent; content:"nmap"; nocase; sid:10000321; rev:2;)
+
+# Common scanning tools detection - sqlmap
+alert http any any -> $HOME_NET any (msg:"SCAN Tool sqlmap Detected"; flow:to_server; http.user_agent; content:"sqlmap"; nocase; sid:10000322; rev:2;)
+
+# Common scanning tools detection - dirbuster
+alert http any any -> $HOME_NET any (msg:"SCAN Tool dirbuster Detected"; flow:to_server; http.user_agent; content:"dirbuster"; nocase; sid:10000323; rev:2;)
+
+# Common scanning tools detection - burp
+alert http any any -> $HOME_NET any (msg:"SCAN Tool burp Detected"; flow:to_server; http.user_agent; content:"burp"; nocase; sid:10000324; rev:2;)
+
+# Multiple requests to scanning paths
+alert http any any -> $HOME_NET any (msg:"SCAN Rapid Admin Path Access"; flow:to_server,established; http.uri; content:"/admin"; threshold:type by_src,track by_src,count 5,seconds 60; sid:10000325; rev:1;)
+
+# SQL injection patterns in URI using pcre
+alert http any any -> $HOME_NET any (msg:"SCAN SQL Injection Union"; flow:to_server,established; http.uri; pcre:"/union.*select/i"; sid:10000326; rev:1;)
+
+# SQL injection DROP keyword
+alert http any any -> $HOME_NET any (msg:"SCAN SQL Injection Drop"; flow:to_server,established; http.uri; pcre:"/drop.*table|drop.*database/i"; sid:10000327; rev:1;)
+
+# SQL injection DELETE keyword
+alert http any any -> $HOME_NET any (msg:"SCAN SQL Injection Delete"; flow:to_server,established; http.uri; pcre:"/delete.*from/i"; sid:10000328; rev:1;)
+
+# Root directory enumeration - /index
+alert http any any -> $HOME_NET any (msg:"SCAN Root /index Enumeration"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/index"; nocase; sid:10000329; rev:1;)
+
+# Root directory enumeration - /home
+alert http any any -> $HOME_NET any (msg:"SCAN Root /home Enumeration"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/home"; sid:10000330; rev:1;)
+
+# Root directory enumeration - /root
+alert http any any -> $HOME_NET any (msg:"SCAN Root /root Enumeration"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/root"; sid:10000331; rev:1;)
+
+# Root directory enumeration - /var
+alert http any any -> $HOME_NET any (msg:"SCAN Root /var Enumeration"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/var"; sid:10000332; rev:1;)
+
+# Root directory enumeration - /.well-known
+alert http any any -> $HOME_NET any (msg:"SCAN Root /.well-known Enumeration"; flow:to_server,established; http.method; content:"GET"; http.uri; content:"/.well-known"; sid:10000333; rev:1;)
+
+# Suspicious query strings with common injection keywords
+alert http any any -> $HOME_NET any (msg:"SCAN Suspicious Query String"; flow:to_server,established; http.uri; pcre:"/(sleep|benchmark|load_file|outfile|into.*dumpfile)/i"; sid:10000335; rev:1;)

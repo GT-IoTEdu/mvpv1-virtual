@@ -1,0 +1,6 @@
+# Web Simple Scanner Detection - ferramentas conhecidas via User-Agent
+alert http any any -> $HOME_NET any (msg:"SCAN Nikto Web Scanner"; flow:to_server,established; http.user_agent; content:"Nikto"; nocase; sid:10000301; rev:1;)
+alert http any any -> $HOME_NET any (msg:"SCAN SQLMap Web Scanner"; flow:to_server,established; http.user_agent; content:"sqlmap"; nocase; sid:10000302; rev:1;)
+alert http any any -> $HOME_NET any (msg:"SCAN Nmap Scripting Engine"; flow:to_server,established; http.user_agent; content:"Nmap Scripting Engine"; nocase; sid:10000303; rev:1;)
+alert http any any -> $HOME_NET any (msg:"SCAN WPScan WordPress Scanner"; flow:to_server,established; http.user_agent; content:"WPScan"; nocase; sid:10000304; rev:1;)
+alert http any any -> $HOME_NET any (msg:"SCAN DirBuster Directory Scanner"; flow:to_server,established; http.user_agent; content:"DirBuster"; nocase; sid:10000305; rev:1;)

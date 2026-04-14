@@ -1,0 +1,11 @@
+# ========================================
+# IPv6 NS Flood
+# ========================================
+
+# Detecta Neighbor Solicitation em ff02::1 (all-nodes multicast)
+# Stateless pra evitar overhead de estado, já que NS pode ser usado em ataques de origem randomizada
+alert ip any any -> ff02::1 any (msg:"ATAQUE -> IPv6 NS Flood (Neighbor Solicitation para ff02::1)";
+    flow:stateless;
+    detection_filter:track by_dst, count 80, seconds 5;
+    sid:1009609; rev:2;
+)

@@ -1,0 +1,28 @@
+# ========================================
+# Detecção de UDP Flood
+# ========================================
+
+# UDP flood genérico (qualquer porta)
+# Normal: QUIC/streaming pode chegar a ~500 pps por sessão.
+# 1000 pkt / 5s = 200 pps → flag apenas tráfego anômalo, bem abaixo do flood real.
+alert udp any any -> any any (msg:"ATAQUE -> UDP Flood (Genérico)"; detection_filter:track by_src, count 2000, seconds 5; sid:1000063; rev:2;)
+
+# UDP flood DNS (53) — DNS Amplification
+# Normal: cliente faz ~1–5 queries/s em pico de navegação.
+# 300 pkt / 5s = 60 pps → cobre resolvers e clientes ocupados sem falso-positivo.
+alert udp any any -> any 53 (msg:"ATAQUE -> UDP Flood (DNS Port 53)"; detection_filter:track by_src, count 300, seconds 5; sid:1000064; rev:2;)
+
+# UDP flood NTP (123) — NTP Amplification
+# Normal: cliente legítimo faz 1 query a cada poucos minutos.
+# 50 pkt / 10s = 5 pps → já é altamente suspeito para NTP.
+alert udp any any -> any 123 (msg:"ATAQUE -> UDP Flood (NTP Port 123)"; detection_filter:track by_src, count 50, seconds 10; sid:1000065; rev:2;)
+
+# UDP flood CoAP (5683)
+# Normal: sensor IoT envia ~0.1–2 pps.
+# 50 pkt / 10s = 5 pps → margem confortável acima do IoT legítimo.
+alert udp any any -> any 5683 (msg:"ATAQUE -> UDP Flood (CoAP Port 5683)"; detection_filter:track by_src, count 50, seconds 10; sid:1000067; rev:2;)
+
+# UDP flood em portas altas (>=1024)
+# Normal: QUIC (YouTube/Instagram) pode atingir ~500 pps por sessão de vídeo HD.
+# 2000 pkt / 5s = 400 pps → abaixo do streaming legítimo em pico, muito abaixo do flood.
+alert udp any any -> any 1024: (msg:"ATAQUE -> UDP Flood (Porta Alta)"; detection_filter:track by_src, count 2000, seconds 5; sid:1000066; rev:2;)

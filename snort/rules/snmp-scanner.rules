@@ -1,0 +1,23 @@
+# ========================================
+# SNMP Scanner Attack
+# ========================================
+
+# Detecta varredura SNMP por alto volume de consultas em UDP/161
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (Alta Frequencia UDP 161)";
+    detection_filter:track by_src, count 3, seconds 5;
+    sid:1000093; rev:2;
+)
+
+# Detecta brute-force de community strings comuns em consultas SNMP
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (Community Strings Comuns)";
+    pcre:"/(public|private|secret|snmp|snmpd|snmptrap|system|sys|admin|root|manager|monitor|agent_steal|all|rw|rwa|write|read|readwrite|test|test2|tech|security|superuser)/i";
+    detection_filter:track by_src, count 3, seconds 5;
+    sid:1000094; rev:2;
+)
+
+# Detecta rajada de GetRequest SNMP (PDU type 0xA0)
+alert udp any any -> any 161 (msg:"ATAQUE -> SNMP Scanner (GetRequest Burst)";
+    content:"|A0|";
+    detection_filter:track by_src, count 3, seconds 5;
+    sid:1000095; rev:1;
+)

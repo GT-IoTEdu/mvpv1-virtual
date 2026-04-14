@@ -1,0 +1,5 @@
+# ========================================
+# SYN Flood
+# ========================================
+
+alert tcp any any -> any [80,443,8080] (msg:"LOCAL SYN Flood Detected"; flow:to_server,stateless; flags:S; threshold:type both, track by_dst, count 20, seconds 10; sid:1000096; rev:3;)

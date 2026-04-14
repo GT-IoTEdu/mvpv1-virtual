@@ -1,0 +1,17 @@
+# ========================================
+# MQTT Brute Force Attack
+# ========================================
+
+# Detecta muitas conexões para broker MQTT (porta 1883)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Brute Force (Muitas Conexoes)";
+	flags:S; detection_filter:track by_src, count 20, seconds 30;
+    sid:1000098; rev:1;
+)
+
+# Detecta alta frequencia de pacotes MQTT CONNECT com assinatura do protocolo
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Brute Force (Tentativas CONNECT)";
+	flow:to_server,established;
+    content:"|00 04 4D 51 54 54|";
+    detection_filter:track by_src, count 15, seconds 60;
+    sid:1000099; rev:1;
+)

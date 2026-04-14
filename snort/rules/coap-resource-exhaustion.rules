@@ -1,0 +1,18 @@
+# ========================================
+# Coap Resource Exhaustion 
+# ========================================
+
+# Detecta qualquer origem para qualquer destino (GET com payload grande)
+alert udp any any -> any 5683 (msg:"ATAQUE -> COAP ROSOURCE EXHAUSTION (Generico)"; dsize:>9; byte_test:1,=,1,1; classtype:attempted-dos; sid:1005201; rev:2;)
+
+# Detecta direção da rede
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP ROSOURCE EXHAUSTION (Direcao)"; dsize:>9; byte_test:1,=,1,1; classtype:attempted-dos; sid:1005202; rev:2;)
+
+# Detecta com validação de tamanho de pacote
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP ROSOURCE EXHAUSTION (Validacao de Tamanho)"; dsize:>9; byte_test:1,=,1,1; classtype:attempted-dos; sid:1005203; rev:2;)
+
+# Detecta com validação de payload
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP ROSOURCE EXHAUSTION (Otimizada)"; metadata:service coap; dsize:>9; isdataat:2; byte_test:1,=,1,1; classtype:attempted-dos; sid:1005204; rev:2;)
+
+# Detecta com verificação estrita de versão do protocolo
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP ROSOURCE EXHAUSTION (Estrita v1)"; metadata:service coap; dsize:>9; isdataat:2; byte_test:1,&,64,0; byte_test:1,=,1,1; classtype:attempted-dos; sid:1005205; rev:2;)

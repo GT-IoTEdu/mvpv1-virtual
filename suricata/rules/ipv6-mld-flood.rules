@@ -1,0 +1,4 @@
+# IPv6 MLD Flood
+# Detecta MLD Report (ICMPv6 type 131) enviado para ff02::2 (all-routers) e rajada de MLD Reports em alta frequencia
+#alert ipv6 any any -> ff02::2 any (msg:"ATAQUE -> IPv6 MLD Flood (MLD Report para ff02::2)"; flow:stateless; sid:1009603; rev:3;)
+alert ipv6 any any -> ff02::2 any (msg:"ATAQUE -> IPv6 MLD Flood (Alta Frequencia)"; flow:stateless; detection_filter:track by_src, count 80, seconds 5; sid:1009604; rev:3;)

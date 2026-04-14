@@ -1,0 +1,29 @@
+# ========================================
+# DoS HTTP Attack
+# ========================================
+
+# HTTP Flood genérico (alto volume de requisições por segundo)
+# Normal: browser em burst agressivo pode chegar a ~40 req/s.
+# 200 pkt / 1s = 200 pps → muito acima de qualquer browser legítimo,
+# muito abaixo de floods reais (500–10.000+ req/s).
+alert tcp any any -> any [80,443,8080] (msg:"ATAQUE -> DoS HTTP Attack"; flow:established,to_server; detection_filter:track by_src, count 500, seconds 1; classtype:attempted-dos; sid:1000073; rev:2;)
+
+# Slowloris — Muitas conexões GET abertas lentamente (versão consolidada)
+# Normal: Chrome abre ~6 conexões paralelas por origem; em burst pesado ~10–15 em 10s.
+# Slowloris real abre 100–500+ conexões e as mantém por minutos.
+# 60 pkt / 30s = 2 pps → detecta acúmulo lento característico do Slowloris,
+# sem disparar em sessões de navegação normais.
+alert tcp any any -> any [80,443,8080] (msg:"ATAQUE -> Possível Slowloris (conexoes lentas acumuladas)"; flow:to_server,established; content:"GET"; detection_filter:track by_src, count 60, seconds 30; classtype:attempted-dos; sid:1000075; rev:2;)
+
+# Slowloris — Burst de GET suspeito (muitas requisições incompletas em janela curta)
+# Normal: burst de página pesada ~30–40 req em 5s.
+# 80 pkt / 5s = 16 pps → acima do burst de navegação, abaixo de flood real.
+# Serve como complemento: pega quem tenta Slowloris em rajadas rápidas
+# em vez do padrão lento clássico.
+alert tcp any any -> any [80,443,8080] (msg:"ATAQUE -> Slowloris provável (burst de GET)"; flow:to_server,established; content:"GET /"; detection_filter:track by_src, count 80, seconds 5; classtype:attempted-dos; sid:1000077; rev:2;)
+
+# HTTP GET Flood — alto volume de GETs (camada de aplicação)
+# Normal: navegação pesada ~40 req/s em pico.
+# 300 pkt / 5s = 60 pps → margem confortável acima do legítimo,
+# ordens de magnitude abaixo de ferramentas como ab, wrk, hping3.
+alert tcp any any -> any [80,443,8080] (msg:"ATAQUE -> HTTP DoS GET Flood"; flow:to_server,established; content:"GET"; http_method; detection_filter:track by_src, count 300, seconds 5; classtype:attempted-dos; sid:1000026; rev:2;)

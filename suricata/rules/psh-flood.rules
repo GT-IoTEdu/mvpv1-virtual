@@ -1,0 +1,5 @@
+# REGRAS DE PSH FLOOD - Suricata
+
+alert tcp any any -> any any (msg:"PSH FLOOD - Alta taxa de pacotes TCP PSH"; flags:P; threshold: type both, track by_src, count 10, seconds 10; classtype:denial-of-service; sid:2900001; rev:1;)
+alert tcp any any -> any [80,443,8080,8443] (msg:"PSH FLOOD - Alvo servidor Web"; flags:P; threshold: type both, track by_src, count 20, seconds 5; classtype:denial-of-service; sid:2900002; rev:1;)
+alert tcp any any -> any any (msg:"PSH FLOOD - Pacotes PSH com payload minimo suspeito"; flags:P; dsize:1<>10; threshold: type both, track by_src, count 20, seconds 5; classtype:denial-of-service; sid:2900004; rev:1;)

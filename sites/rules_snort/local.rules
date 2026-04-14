@@ -1,0 +1,16 @@
+# ========================================
+# Regras Gerais
+# ========================================
+
+# Log HTTP GET normal
+#alert tcp any any -> any $HTTP_PORTS (msg:"LOG -> HTTP GET"; content:"GET"; http_method; sid:1000036; rev:1;)
+
+# Log HTTP POST normal
+#alert tcp any any -> any $HTTP_PORTS (msg:"LOG -> HTTP POST"; content:"POST"; http_method; sid:1000037; rev:1;)
+
+# Log SSH connection (sintaxe básica)
+#alert tcp any any -> any 22 (msg:"LOG -> SSH Connection"; content:"SSH-2.0"; sid:1000038; rev:1;)
+
+# Log DNS query
+#alert udp any any -> any 53 (msg:"LOG -> DNS Query"; sid:1000039; rev:1;)
+

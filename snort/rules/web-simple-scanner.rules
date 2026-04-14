@@ -1,0 +1,175 @@
+# ===========================================================================
+# Arquivo  : web-simple-scanner.rules
+# Descrição: Detecção de scanners web simples
+# Fix v3   : Removido nocase standalone (não suportado após sticky buffer
+#            nesta build do Snort 3). Ferramentas enviam User-Agent em case
+#            fixo, portanto nocase não é necessário para detecção.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# User-Agents conhecidos (case fixo conforme enviado pelas ferramentas)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - User-Agent Nikto detectado";
+    flow:to_server,established;
+    http_header;
+    content:"Nikto";
+    classtype:web-application-activity;
+    priority:2;
+    metadata:tool nikto, technique web-scanning;
+    sid:9210001;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - User-Agent nikto (lowercase) detectado";
+    flow:to_server,established;
+    http_header;
+    content:"nikto";
+    classtype:web-application-activity;
+    priority:2;
+    metadata:tool nikto, technique web-scanning;
+    sid:9210002;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - User-Agent sqlmap detectado";
+    flow:to_server,established;
+    http_header;
+    content:"sqlmap";
+    classtype:web-application-activity;
+    priority:2;
+    metadata:tool sqlmap, technique web-scanning;
+    sid:9210003;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - User-Agent WPScan detectado";
+    flow:to_server,established;
+    http_header;
+    content:"WPScan";
+    classtype:web-application-activity;
+    priority:2;
+    metadata:tool wpscan, technique web-scanning;
+    sid:9210004;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - User-Agent DirBuster detectado";
+    flow:to_server,established;
+    http_header;
+    content:"DirBuster";
+    classtype:web-application-activity;
+    priority:2;
+    metadata:tool dirbuster, technique web-scanning;
+    sid:9210005;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Sondagem de caminhos administrativos comuns
+# (paths em Linux sao case-sensitive; /admin e /Admin sao diferentes)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda URI /admin";
+    flow:to_server,established;
+    http_uri;
+    content:"/admin";
+    classtype:web-application-activity;
+    priority:3;
+    sid:9210010;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda URI /wp-admin";
+    flow:to_server,established;
+    http_uri;
+    content:"/wp-admin";
+    classtype:web-application-activity;
+    priority:3;
+    sid:9210011;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda URI /.env";
+    flow:to_server,established;
+    http_uri;
+    content:"/.env";
+    classtype:web-application-activity;
+    priority:2;
+    sid:9210012;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda URI /phpmyadmin";
+    flow:to_server,established;
+    http_uri;
+    content:"/phpmyadmin";
+    classtype:web-application-activity;
+    priority:2;
+    sid:9210013;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda URI /actuator (Spring Boot)";
+    flow:to_server,established;
+    http_uri;
+    content:"/actuator";
+    classtype:web-application-activity;
+    priority:2;
+    sid:9210014;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Rate-based: multiplos 404 (enumeracao de diretorios)
+# ---------------------------------------------------------------------------
+alert http $HOME_NET $HTTP_PORTS -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu Web Simple Scanner - Multiplos 404 (20/30s) enumeracao de paths";
+    flow:to_client,established;
+    http_stat_code;
+    content:"404";
+    detection_filter:track by_dst, count 20, seconds 30;
+    classtype:web-application-activity;
+    priority:2;
+    metadata:technique directory-enumeration;
+    sid:9210020;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Rate-based: GET flood de scanner simples
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Rate alto de requisicoes GET (80/10s)";
+    flow:to_server,established;
+    http_method;
+    content:"GET";
+    detection_filter:track by_src, count 80, seconds 10;
+    classtype:web-application-activity;
+    priority:2;
+    metadata:technique web-scanning;
+    sid:9210021;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Arquivos de backup expostos (via pcre, sem modificador H)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Simple Scanner - Sonda de arquivo de backup (.bak/.old/.sql)";
+    flow:to_server,established;
+    http_uri;
+    pcre:"/\.(bak|old|sql|dump|orig)(\?|$)/i";
+    classtype:web-application-activity;
+    priority:2;
+    sid:9210031;
+    rev:3;
+)

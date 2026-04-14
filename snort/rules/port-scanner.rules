@@ -1,0 +1,402 @@
+# ===========================================================================
+# Arquivo  : port-scanner.rules
+# Descricao: Deteccao de port scanners (aggressive, os, tcp, udp, vuln)
+# Padrao   : GT-IoTEdu — Snort 3.9.7
+# SIDs     : 9220001 – 9220055
+# v3       : Removida regra UDP generica rate-based (FP em broadcasts)
+#            Telnet threshold aumentado
+#            UDP restrito a portas e conteudos especificos
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# [1] iotedu-attack-port-scanner-aggressive
+# Flags TCP que NUNCA ocorrem em trafego legitimo
+# ---------------------------------------------------------------------------
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner Aggressive - TCP NULL flags";
+    flags:0;
+    classtype:network-scan;
+    priority:1;
+    metadata:technique port-scanning;
+    sid:9220001;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner Aggressive - TCP XMAS scan FIN+PSH+URG";
+    flags:FPU;
+    classtype:network-scan;
+    priority:1;
+    metadata:technique port-scanning;
+    sid:9220002;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner Aggressive - TCP FIN sem ACK";
+    flags:F,12;
+    classtype:network-scan;
+    priority:1;
+    metadata:technique port-scanning;
+    sid:9220003;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner Aggressive - TCP SYN window zero";
+    flags:S,12;
+    window:0;
+    classtype:network-scan;
+    priority:1;
+    metadata:technique port-scanning;
+    sid:9220004;
+    rev:3;
+)
+
+# SYN rate-based: origem externa, 50 SYNs em 5s
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner Aggressive - SYN rate alto 50 em 5s";
+    flags:S,12;
+    detection_filter:track by_src, count 50, seconds 5;
+    classtype:network-scan;
+    priority:1;
+    metadata:technique port-scanning;
+    sid:9220005;
+    rev:3;
+)
+
+
+# ---------------------------------------------------------------------------
+# [2] iotedu-attack-port-scanner-os
+# Flags e probes invalidos por RFC — nao ocorrem em trafego normal
+# ---------------------------------------------------------------------------
+
+alert icmp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - ICMP timestamp request";
+    itype:13;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220010;
+    rev:3;
+)
+
+alert icmp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - ICMP address mask request";
+    itype:17;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220011;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - TCP URG+PSH probe";
+    flags:UP;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220012;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - TCP SYN+URG invalido";
+    flags:SU;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220013;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - TCP SYN+FIN invalido RFC793";
+    flags:SF;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220014;
+    rev:3;
+)
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner OS - TCP SYN+RST invalido";
+    flags:SR;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique os-fingerprinting;
+    sid:9220015;
+    rev:3;
+)
+
+
+# ---------------------------------------------------------------------------
+# [3] iotedu-attack-port-scanner-tcp
+# Apenas combinacoes de flags invalidas por RFC
+# ACK stateless e RST generico removidos (FP alto)
+# ---------------------------------------------------------------------------
+
+alert tcp any any -> $HOME_NET any (
+    msg:"GT-IoTEdu Port Scanner TCP - FIN+SYN invalido RFC793";
+    flags:FS,12;
+    classtype:network-scan;
+    priority:2;
+    metadata:technique port-scanning;
+    sid:9220022;
+    rev:3;
+)
+
+# RST flood saindo: rate alto indica muitas portas fechadas sendo varridas
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu Port Scanner TCP - RST flood saindo portas fechadas";
+    flags:R,12;
+    detection_filter:track by_dst, count 30, seconds 5;
+    classtype:network-scan;
+    priority:2;
+    metadata:technique port-scanning;
+    sid:9220023;
+    rev:3;
+)
+
+
+# ---------------------------------------------------------------------------
+# [4] iotedu-attack-port-scanner-udp
+# REMOVIDA regra generica rate-based (causava FP em broadcasts UDP)
+# Mantidas apenas portas especificas com content ou raramente usadas
+# ---------------------------------------------------------------------------
+
+# SNMP: PDU com tag BER |30| vinda de externo
+alert udp $EXTERNAL_NET any -> $HOME_NET 161 (
+    msg:"GT-IoTEdu Port Scanner UDP - SNMP probe externo porta 161";
+    content:"|30|";
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique port-scanning;
+    sid:9220030;
+    rev:3;
+)
+
+# TFTP: raramente usado legitimamente, probe externo e sempre suspeito
+alert udp $EXTERNAL_NET any -> $HOME_NET 69 (
+    msg:"GT-IoTEdu Port Scanner UDP - TFTP probe externo porta 69";
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique port-scanning;
+    sid:9220032;
+    rev:3;
+)
+
+# SSDP: M-SEARCH de fora da rede local — reconhecimento UPnP externo
+#alert udp $EXTERNAL_NET any -> $HOME_NET 1900 (
+#    msg:"GT-IoTEdu Port Scanner UDP - SSDP M-SEARCH externo porta 1900";
+#    content:"M-SEARCH";
+#    classtype:attempted-recon;
+#    priority:2;
+#    metadata:technique port-scanning;
+#    sid:9220033;
+#    rev:3;
+#)
+
+# ICMP port-unreachable flood: muitos destinos fechados sendo varridos via UDP
+# Destino unicast apenas (!255 exclui broadcasts que geram FP)
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu Port Scanner UDP - ICMP port-unreachable flood saindo";
+    itype:3;
+    icode:3;
+    detection_filter:track by_dst, count 20, seconds 10;
+    classtype:network-scan;
+    priority:2;
+    metadata:technique port-scanning;
+    sid:9220035;
+    rev:3;
+)
+
+
+# ---------------------------------------------------------------------------
+# [5] iotedu-attack-port-scanner-vulnerabilities
+# Conteudo especifico de ferramentas — FP naturalmente baixo
+# ---------------------------------------------------------------------------
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Port Scanner Vuln - HTTP Nikto scanner";
+    flow:to_server,established;
+    http_header;
+    content:"Nikto";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:tool nikto, technique vuln-scanning;
+    sid:9220040;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Port Scanner Vuln - HTTP masscan scanner";
+    flow:to_server,established;
+    http_header;
+    content:"masscan";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:tool masscan, technique vuln-scanning;
+    sid:9220041;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Port Scanner Vuln - HTTP zgrab scanner";
+    flow:to_server,established;
+    http_header;
+    content:"zgrab";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:tool zgrab, technique vuln-scanning;
+    sid:9220042;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Port Scanner Vuln - HTTP nuclei scanner";
+    flow:to_server,established;
+    http_header;
+    content:"nuclei";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:tool nuclei, technique vuln-scanning;
+    sid:9220043;
+    rev:3;
+)
+
+# SSH banner grab: "SSH-" vindo de externo em porta SSH
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (
+    msg:"GT-IoTEdu Port Scanner Vuln - SSH banner grab externo porta 22";
+    flow:to_server,established;
+    content:"SSH-";
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220044;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 2222 (
+    msg:"GT-IoTEdu Port Scanner Vuln - SSH banner grab externo porta 2222";
+    flow:to_server,established;
+    content:"SSH-";
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220045;
+    rev:3;
+)
+
+# Telnet externo: 5 conexoes em 60s para reduzir FP pos-ataque
+alert tcp $EXTERNAL_NET any -> $HOME_NET 23 (
+    msg:"GT-IoTEdu Port Scanner Vuln - Telnet probe externo porta 23";
+    flags:S,12;
+    detection_filter:track by_src, count 5, seconds 60;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220046;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 2323 (
+    msg:"GT-IoTEdu Port Scanner Vuln - Telnet probe externo porta 2323";
+    flags:S,12;
+    detection_filter:track by_src, count 5, seconds 60;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220047;
+    rev:3;
+)
+
+# SMB externo: qualquer SYN de fora e altamente suspeito
+alert tcp $EXTERNAL_NET any -> $HOME_NET 445 (
+    msg:"GT-IoTEdu Port Scanner Vuln - SMB probe externo porta 445";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique vuln-scanning;
+    sid:9220048;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 139 (
+    msg:"GT-IoTEdu Port Scanner Vuln - SMB probe externo porta 139";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique vuln-scanning;
+    sid:9220049;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (
+    msg:"GT-IoTEdu Port Scanner Vuln - FTP probe externo porta 21";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220050;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 3389 (
+    msg:"GT-IoTEdu Port Scanner Vuln - RDP probe externo porta 3389";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique vuln-scanning;
+    sid:9220051;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8443 (
+    msg:"GT-IoTEdu Port Scanner Vuln - IoT admin HTTPS externo 8443";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220052;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 8888 (
+    msg:"GT-IoTEdu Port Scanner Vuln - IoT admin probe externo 8888";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220053;
+    rev:3;
+)
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 1883 (
+    msg:"GT-IoTEdu Port Scanner Vuln - MQTT probe externo porta 1883";
+    flags:S,12;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vuln-scanning;
+    sid:9220054;
+    rev:3;
+)
+
+# SNMP community "public" — credencial padrao IoT/infra
+alert udp $EXTERNAL_NET any -> $HOME_NET 161 (
+    msg:"GT-IoTEdu Port Scanner Vuln - SNMP community public externo";
+    content:"public";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique vuln-scanning;
+    sid:9220055;
+    rev:3;
+)
+
+# ===========================================================================
+# FIM — SIDs 9220001–9220055  |  rev:3
+# ===========================================================================

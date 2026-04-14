@@ -1,0 +1,8 @@
+alert icmp any any -> $HOME_NET any (
+    msg:"ATAQUE -> ICMP Ping Sweep";
+    itype:8;
+    detection_filter:track by_src, count 30, seconds 5;
+    sid:1009441;
+    rev:1;
+)
+

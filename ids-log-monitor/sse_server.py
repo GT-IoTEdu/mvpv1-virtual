@@ -56,9 +56,9 @@ SID_IN_MESSAGE_PATTERN = re.compile(r'\[(\d+):(\d+):(\d+)\]')
 # =====================================================
 # LOG FILES
 # =====================================================
-LOG_FILE_SURICATA = "/var/log/suricata/fast.log"
-LOG_FILE_SNORT = "/var/log/snort/alert"
-LOG_FILE_ZEEK = "../logs/notice.log"  # Adicionado Zeek
+LOG_FILE_SURICATA = "../logs_suricata/fast.log"
+LOG_FILE_SNORT = "../logs/snort/alert"
+LOG_FILE_ZEEK = "../logs_zeek/notice.log"  # Adicionado Zeek
 
 # =====================================================
 # API KEYS

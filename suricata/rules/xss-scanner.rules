@@ -1,0 +1,65 @@
+# ========================================
+# XSS Scanner Detection (DalFox)
+# ========================================
+
+# --- Detecção por Payload (tags e handlers na URI) ---
+
+# Detecta <script injetado na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (Script Tag na URI)"; flow:to_server,established; http.uri; content:"<script"; nocase; classtype:web-application-attack; sid:1000040; rev:2;)
+
+# Detecta event handler onerror= na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (Event Handler onerror na URI)"; flow:to_server,established; http.uri; content:"onerror="; nocase; classtype:web-application-attack; sid:1000041; rev:2;)
+
+# Detecta event handler onload= na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (Event Handler onload na URI)"; flow:to_server,established; http.uri; content:"onload="; nocase; classtype:web-application-attack; sid:1000042; rev:2;)
+
+# Detecta prompt() na URI (payload padrão do DalFox)
+alert http any any -> any any (msg:"ATAQUE -> XSS (prompt() na URI)"; flow:to_server,established; http.uri; content:"prompt("; nocase; classtype:web-application-attack; sid:1000043; rev:2;)
+
+# Detecta alert() na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (alert() na URI)"; flow:to_server,established; http.uri; content:"alert("; nocase; classtype:web-application-attack; sid:1000044; rev:2;)
+
+# Detecta protocolo javascript: na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (javascript: na URI)"; flow:to_server,established; http.uri; content:"javascript:"; nocase; classtype:web-application-attack; sid:1000045; rev:2;)
+
+# Detecta <svg na URI (payloads XSS modernos)
+alert http any any -> any any (msg:"ATAQUE -> XSS (SVG Tag na URI)"; flow:to_server,established; http.uri; content:"<svg"; nocase; classtype:web-application-attack; sid:1000046; rev:2;)
+
+# Detecta <iframe na URI
+alert http any any -> any any (msg:"ATAQUE -> XSS (iframe Tag na URI)"; flow:to_server,established; http.uri; content:"<iframe"; nocase; classtype:web-application-attack; sid:1000047; rev:2;)
+
+# Detecta eval() na URI (execução dinâmica)
+alert http any any -> any any (msg:"ATAQUE -> XSS (eval() na URI)"; flow:to_server,established; http.uri; content:"eval("; nocase; classtype:web-application-attack; sid:1000048; rev:2;)
+
+# --- Detecção Comportamental (volume de probes) ---
+
+# Alta frequência de requisições com < na URI indica scanner XSS
+alert http any any -> any any (msg:"ATAQUE -> XSS (Scanner Alta Frequência)"; flow:to_server,established; http.uri; content:"<"; threshold:type both, track by_src, count 30, seconds 10; classtype:web-application-attack; sid:1000049; rev:2;)
+
+# --- Detecção Double-Encoded (após 1 decode, %253C vira %3C na http.uri) ---
+
+# Double-encoded <script (%253Cscript → %3Cscript)
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc Script Tag)"; flow:to_server,established; http.uri; content:"%3Cscript"; nocase; classtype:web-application-attack; sid:1000050; rev:1;)
+
+# Double-encoded <svg
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc SVG Tag)"; flow:to_server,established; http.uri; content:"%3Csvg"; nocase; classtype:web-application-attack; sid:1000051; rev:1;)
+
+# Double-encoded <iframe
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc iframe Tag)"; flow:to_server,established; http.uri; content:"%3Ciframe"; nocase; classtype:web-application-attack; sid:1000052; rev:1;)
+
+# Double-encoded <img
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc img Tag)"; flow:to_server,established; http.uri; content:"%3Cimg"; nocase; classtype:web-application-attack; sid:1000053; rev:1;)
+
+# Double-encoded closing tags (</body>, </html> - reflection test do DalFox)
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc Closing Tag)"; flow:to_server,established; http.uri; content:"%3C%2F"; nocase; classtype:web-application-attack; sid:1000054; rev:1;)
+
+# Double-encoded prompt( — payload padrão DalFox com encoding extra
+alert http any any -> any any (msg:"ATAQUE -> XSS (Double-Enc prompt())"; flow:to_server,established; http.uri; content:"prompt"; nocase; content:"%28"; nocase; classtype:web-application-attack; sid:1000055; rev:1;)
+
+# --- Detecção HTML Entity Encoded (DalFox usa &lt; &gt; encoded) ---
+
+# HTML entity < encoded como &lt; (%26lt%3B → &lt; na http.uri)
+alert http any any -> any any (msg:"ATAQUE -> XSS (HTML Entity LT na URI)"; flow:to_server,established; http.uri; content:"&lt"; nocase; classtype:web-application-attack; sid:1000056; rev:2;)
+
+# HTML entity > encoded como &gt;
+alert http any any -> any any (msg:"ATAQUE -> XSS (HTML Entity GT na URI)"; flow:to_server,established; http.uri; content:"&gt"; nocase; classtype:web-application-attack; sid:1000057; rev:2;)

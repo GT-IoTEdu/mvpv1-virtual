@@ -1,0 +1,71 @@
+# validar
+# alert tcp any any -> any 8080 (msg:"TESTE -> qualquer trafego 8080"; sid:9000099; rev:1;)
+
+# não funciona
+# alert http any any -> any 8080 (msg:"TESTE -> HTTP dissector"; flow:to_server,established; sid:9000098; rev:1;)
+
+# alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal"; flow:to_server,established; http_uri; content:"/etc/passwd", nocase; classtype:web-application-attack; sid:9000001; rev:1;)
+
+# funcional, não sei se pega tudo
+#alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal"; flow:to_server,established; http_uri; pcre:"/(\.\.|\/etc\/passwd|\/etc\/shadow|\/etc\/group|\/proc\/self|\/logs\/)/i"; sid:9000001; rev:1;)
+
+# depois de muita tentativa e erro...
+
+# 1. Traversal com null byte (%00) - antes da normalização, pega no raw
+alert http any any -> any 8080 (
+	msg:"ATAQUE -> Path Traversal (Null Byte)";
+	flow:to_server,established;
+	http_raw_uri;
+	content:"%00", nocase;
+	classtype:web-application-attack;
+	sid:9000010;
+	rev:1;
+)
+
+# 2. Double slash - sinal de traversal sem ../
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Double Slash)";
+	flow:to_server,established;
+	http_raw_uri;
+	content:"//", nocase;
+	classtype:web-application-attack;
+	sid:9000011;
+	rev:1;
+)
+
+# 3. Traversal clássico com ../ - pega no raw antes de normalizar
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Dot-Dot-Slash)";
+	flow:to_server,established;
+	http_raw_uri;
+	content:"../", nocase;
+	classtype:web-application-attack;
+	sid:9000012;
+	rev:1;
+)
+
+# 4. Alvos sensiveis - pega na URI normalizada (paths diretos e após normalizacao do ../)
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - etc)";
+	flow:to_server,established;
+	http_uri;
+	pcre:"/\/etc\/(passwd|shadow|group|security|my\.cnf|php\.ini|httpd\.conf)/i";
+	classtype:web-application-attack;
+	sid:9000013;
+	rev:1;
+)
+
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - proc)";
+	flow:to_server,established;
+	http_uri;
+	content:"/proc/self/", nocase;
+	classtype:web-application-attack;
+	sid:9000014;
+	rev:1;
+)
+
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - logs)";
+	flow:to_server,established;
+	http_uri;
+	pcre:"/\/(var\/log|apache\d?\/logs|logs)\/(access|error)[_\.]log/i";
+	classtype:web-application-attack;
+	sid:9000015;
+	rev:1;
+)

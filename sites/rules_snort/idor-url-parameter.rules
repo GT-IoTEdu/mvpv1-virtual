@@ -1,0 +1,67 @@
+# ========================================
+# IDOR URL Parameter Enumeration Detection
+# ========================================
+
+# Detecta User-Agent do ffuf (assinatura de ferramenta)
+alert http any any -> any $HTTP_PORTS (
+	msg:"ATAQUE -> IDOR URL Parameter (Ffuf User-Agent)";
+	flow:to_server,established;
+	http_header;
+	content:"User-Agent|3A|", nocase;
+	content:"ffuf", nocase;
+	classtype:web-application-attack;
+	sid:1000058;
+	rev:1;
+)
+
+# Detecta enumeração de parâmetros em alta frequência (padrão de scanner)
+alert http any any -> any $HTTP_PORTS (
+	msg:"ATAQUE -> IDOR URL Parameter (Scanner Alta Frequencia)";
+	flow:to_server,established;
+	http_method;
+	content:"GET";
+	http_uri;
+	content:"?";
+	content:"=";
+	detection_filter:track by_src, count 50, seconds 5;
+	classtype:web-application-attack;
+	sid:1000059;
+	rev:1;
+)
+
+# Detecta brute-force de parâmetro em endpoint de autenticação via query string
+alert http any any -> any $HTTP_PORTS (
+	msg:"ATAQUE -> IDOR URL Parameter (Enumeracao de Parametro em Login)";
+	flow:to_server,established;
+	http_uri;
+	content:"/login.php?", nocase;
+	content:"=";
+	detection_filter:track by_src, count 50, seconds 5;
+	classtype:web-application-attack;
+	sid:1000060;
+	rev:1;
+)
+
+# Detecta varredura em nomes de parâmetros sensíveis comuns de IDOR
+alert http any any -> any $HTTP_PORTS (
+	msg:"ATAQUE -> IDOR URL Parameter (Parametros Sensiveis Alta Frequencia)";
+	flow:to_server,established;
+	http_uri;
+	pcre:"/\?(?:id|user(?:_id)?|uid|account(?:_id)?|customer(?:_id)?|profile(?:_id)?|order(?:_id)?|invoice(?:_id)?|file(?:_id)?)=/i";
+	detection_filter:track by_src, count 50, seconds 5;
+	classtype:web-application-attack;
+	sid:1000061;
+	rev:1;
+)
+
+# Detecta fuzzing rápido de um único parâmetro por volume (comum em enumeração)
+alert http any any -> any $HTTP_PORTS (
+	msg:"ATAQUE -> IDOR URL Parameter (Fuzzing de Valor em Parametro Unico)";
+	flow:to_server,established;
+	http_uri;
+	pcre:"/\?[A-Za-z0-9_]{1,32}=[^&]{1,64}$/";
+	detection_filter:track by_src, count 50, seconds 5;
+	classtype:web-application-attack;
+	sid:1000062;
+	rev:1;
+)

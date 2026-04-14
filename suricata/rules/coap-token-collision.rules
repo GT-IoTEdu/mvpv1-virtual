@@ -1,0 +1,18 @@
+# ==============================================================================
+# Coap Token Collision
+# ==============================================================================
+
+# Detecta qualquer origem para destino (Maior que 16 bytes + palavra 'humidity')
+alert udp any any -> any 5683 (msg:"ATAQUE -> COAP TOKEN COLLISION (Generico)"; dsize:>16; content:"humidity"; classtype:attempted-dos; sid:1000401; rev:8;)
+
+# Detecta direção da rede
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP TOKEN COLLISION (Direcao)"; dsize:>16; content:"humidity"; classtype:attempted-dos; sid:1000402; rev:8;)
+
+# Detecta com validação (Usa a palavra 'actuator' como rede de segurança)
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP TOKEN COLLISION (Validacao)"; dsize:>16; content:"actuator"; classtype:attempted-dos; sid:1000403; rev:8;)
+
+# Detecta otimizada
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP TOKEN COLLISION (Otimizada)"; metadata:service coap; dsize:>16; isdataat:2; content:"humidity"; classtype:attempted-dos; sid:1000404; rev:8;)
+
+# Detecta estrita (Usa 'actuator')
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP TOKEN COLLISION (Estrita v1)"; metadata:service coap; dsize:>16; isdataat:2; byte_test:1,&,64,0; content:"actuator"; classtype:attempted-dos; sid:1000405; rev:8;)

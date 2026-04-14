@@ -1,0 +1,21 @@
+alert tcp any any -> any any (
+    msg:"RST FLOOD - Alta taxa de pacotes TCP RST";
+    flags:R;
+    detection_filter: track by_src, count 50, seconds 10;
+    classtype:denial-of-service;
+    sid:9001001; rev:2;
+)
+alert tcp any any -> any any (
+    msg:"RST FLOOD - Pacotes RST+ACK forcando encerramento de sessoes";
+    flags:RA;
+    detection_filter: track by_src, count 50, seconds 5;
+    classtype:denial-of-service;
+    sid:9001002; rev:2;
+)
+alert tcp any any -> any [22,80,443,8080,8443] (
+    msg:"RST FLOOD - Alvo portas de servicos criticos";
+    flags:R;
+    detection_filter: track by_src, count 50, seconds 5;
+    classtype:denial-of-service;
+    sid:9001003; rev:2;
+)

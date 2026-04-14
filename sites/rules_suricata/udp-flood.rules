@@ -1,0 +1,18 @@
+# ========================================
+# Detecção de UDP Flood
+# ========================================
+
+# Detecta UDP flood genérico (qualquer porta)
+alert udp any any -> any any (msg:"ATAQUE -> UDP Flood (Genérico)"; detection_filter:track by_src, count 10000, seconds 5; sid:1000063; rev:1;)
+
+# Detecta UDP flood na porta DNS (53) - DNS amplification
+alert udp any any -> any 53 (msg:"ATAQUE -> UDP Flood (DNS Port 53)"; detection_filter:track by_src, count 10000, seconds 5; sid:1000064; rev:1;)
+
+# Detecta UDP flood na porta NTP (123) - NTP amplification
+alert udp any any -> any 123 (msg:"ATAQUE -> UDP Flood (NTP Port 123)"; detection_filter:track by_src, count 10000, seconds 5; sid:1000065; rev:1;)
+
+# Detecta UDP flood em portas altas (possível ataque a aplicações)
+alert udp any any -> any 1024: (msg:"ATAQUE -> UDP Flood (Porta Alta)"; detection_filter:track by_src, count 1500, seconds 5; sid:1000066; rev:1;)
+
+# Detecta UDP flood na porta CoAP (5683) com limiar menor para cenários com rate limitado
+alert udp any any -> any 5683 (msg:"ATAQUE -> UDP Flood (CoAP Port 5683)"; detection_filter:track by_src, count 500, seconds 10; sid:1000067; rev:1;)

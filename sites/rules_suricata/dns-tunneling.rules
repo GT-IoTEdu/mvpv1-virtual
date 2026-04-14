@@ -1,0 +1,78 @@
+# ============================================================================
+# Arquivo  : dns-tunneling.rules  (Suricata 8.0.4)
+# Descricao: Deteccao de DNS tunneling — arquivo COMPLETO (original + novas)
+#
+# SUBSTITUI o dns-tunneling.rules existente integralmente.
+# Nenhum SID duplicado. Compativel com Suricata 8.0.4.
+#
+# REGRA CRITICA de compatibilidade:
+#   dsize NAO pode ser combinado com "alert dns" (app-layer).
+#   Regras com dsize usam "alert udp ... 53" em vez de "alert dns".
+#   Regras com dns.query, dns.rcode usam "alert dns" sem dsize.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# BLOCO ORIGINAL — mantido identico
+# ----------------------------------------------------------------------------
+
+# DNS - Label suspeita (Hexadecimal Longo - ex: Cobalt Strike/DNSStager)
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Potential Encoded Subdomain"; dns.query; pcre:"/([0-9a-z]{12,64})\./i"; sid:1000013; rev:3;)
+
+# DNS - Detecta respostas de erro NXDOMAIN (Tunneling ou DGA) - Ignorando PTR reverso
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - High NXDOMAIN rate"; dns.rcode:3; dns.query; content:!".in-addr.arpa"; threshold:type both, track by_dst, count 20, seconds 10; sid:1000014; rev:5;)
+
+# DNS - Alto volume de consultas (Exfiltracao rapida)
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Excessive Query Rate"; threshold:type both, track by_src, count 100, seconds 10; sid:1000015; rev:2;)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — encoding de dados no nome da query (alert dns + dns.query)
+# Sem dsize: dns.query e app-layer, incompativel com match de pacote.
+# ----------------------------------------------------------------------------
+
+# Base32 estrito (iodine) — charset [a-z2-7], 20+ chars antes do primeiro ponto
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Encoding Base32 iodine"; dns.query; pcre:"/^[a-z2-7]{20,}\./i"; classtype:policy-violation; priority:2; metadata:tool iodine, technique dns-tunneling; sid:1000016; rev:1;)
+
+# Base64url — charset [A-Za-z0-9-_], 28+ chars em label antes de TLD duplo
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Encoding Base64url Label"; dns.query; pcre:"/[a-zA-Z0-9\-_]{28,}\.[a-zA-Z0-9\-]+\.[a-zA-Z]{2,}/"; classtype:policy-violation; priority:2; metadata:technique dns-tunneling; sid:1000017; rev:1;)
+
+# Hex estrito (Cobalt Strike / DNSStager) — charset [0-9a-f], 20+ chars
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Encoding Hex Estrito CobaltStrike"; dns.query; pcre:"/^[0-9a-f]{20,}\./i"; classtype:policy-violation; priority:2; metadata:tool cobalt-strike, technique dns-tunneling; sid:1000018; rev:1;)
+
+# 5+ niveis de subdominio — fragmentacao tipica de dados tunelados
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Profundidade Excessiva Subdominio 5+ niveis"; dns.query; pcre:"/([a-zA-Z0-9\-]+\.){5,}/"; classtype:policy-violation; priority:2; metadata:technique dns-tunneling; sid:1000019; rev:1;)
+
+# dnscat2 — dois labels Base32 encadeados: <dados>.<session_id>.<dominio-c2>
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - dnscat2 Dual Base32 Label Pattern"; dns.query; pcre:"/^[a-z2-7]{24,48}\.[a-z2-7]{8,24}\./i"; classtype:policy-violation; priority:1; metadata:tool dnscat2, technique dns-tunneling; sid:1000020; rev:1;)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — rate-based por padrao de encoding (alert dns + threshold)
+# ----------------------------------------------------------------------------
+
+# Rate alto queries Base32 (iodine polling): 30 em 10s por origem
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Rate Alto Queries Base32 iodine (30/10s)"; dns.query; pcre:"/^[a-z2-7]{20,}\./i"; threshold:type both, track by_src, count 30, seconds 10; classtype:policy-violation; priority:1; metadata:tool iodine, technique dns-tunneling; sid:1000021; rev:1;)
+
+# dns2tcp polling continuo: 40 queries codificadas em 10s por origem
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - Rate Alto Queries dns2tcp (40/10s)"; dns.query; pcre:"/[a-zA-Z0-9\-_]{20,}\.[a-zA-Z0-9\-]+\./"; threshold:type both, track by_src, count 40, seconds 10; classtype:policy-violation; priority:1; metadata:tool dns2tcp, technique dns-tunneling; sid:1000022; rev:1;)
+
+# NXDOMAIN acelerado excluindo PTR reverso e mDNS (threshold mais agressivo que sid:1000014)
+alert dns any any -> any any (msg:"LOCAL DNS Tunneling - NXDOMAIN Acelerado (30/10s) DGA"; dns.rcode:3; dns.query; content:!".in-addr.arpa"; content:!".local"; threshold:type both, track by_dst, count 30, seconds 10; classtype:policy-violation; priority:1; metadata:technique dns-tunneling, technique dga; sid:1000023; rev:1;)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — anomalias de tamanho em respostas (alert udp — dsize valido aqui)
+#
+# Usa "alert udp ... 53" em vez de "alert dns" para poder usar dsize.
+# Direção: servidor DNS (porta 53 src) -> clientes
+# ----------------------------------------------------------------------------
+
+# Resposta DNS grande (>300 bytes) vinda de porta 53 — tipico de tunel TXT ativo
+alert udp any 53 -> any any (msg:"LOCAL DNS Tunneling - Resposta DNS Grande (>300 bytes)"; dsize:>300; threshold:type both, track by_src, count 5, seconds 30; classtype:policy-violation; priority:2; metadata:technique dns-tunneling; sid:1000024; rev:1;)
+
+# Resposta DNS muito grande (>500 bytes) — exfiltracao em volume ou canal bidirecional
+alert udp any 53 -> any any (msg:"LOCAL DNS Tunneling - Resposta DNS Muito Grande (>500 bytes)"; dsize:>500; classtype:policy-violation; priority:2; metadata:technique dns-tunneling; sid:1000025; rev:1;)
+
+# Query NULL (QTYPE 0x000A) em payload UDP — dnscat2, nunca ocorre legitimamente
+# alert udp para permitir dsize como verificacao adicional de tamanho reduzido
+alert udp any any -> any 53 (msg:"LOCAL DNS Tunneling - Query NULL Record dnscat2 (UDP)"; content:"|00 0A 00 01|"; dsize:41<>119; classtype:policy-violation; priority:1; metadata:tool dnscat2, technique dns-tunneling; sid:1000026; rev:1;)
+
+# Query ANY (QTYPE 0x00FF) em payload UDP — descontinuado RFC 8482 (dns2tcp/iodine)
+alert udp any any -> any 53 (msg:"LOCAL DNS Tunneling - Query ANY Record dns2tcp/iodine (UDP)"; content:"|00 FF 00 01|"; classtype:policy-violation; priority:1; metadata:tool dns2tcp, tool iodine, technique dns-tunneling; sid:1000027; rev:1;)

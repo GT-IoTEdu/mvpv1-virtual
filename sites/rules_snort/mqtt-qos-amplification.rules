@@ -1,0 +1,34 @@
+# ========================================
+# MQTT QoS Amplification Attack
+# ========================================
+
+# Detecta muitas conexoes para broker MQTT (fan-out massivo de clientes)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Muitas Conexoes)";
+    flags:S;
+    detection_filter:track by_src, count 200, seconds 20;
+    sid:10000107; rev:1;
+)
+
+# Detecta topico alvo padrao do ataque de amplificacao
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Topico Alvo)";
+    flow:to_server,established;
+    content:"amp/target";
+    detection_filter:track by_src, count 80, seconds 20;
+    sid:1000108; rev:1;
+)
+
+# Detecta payload padrao de publicacao QoS2 amplificada
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Payload QoS2)";
+    flow:to_server,established;
+    content:"QoS2_Amplified_";
+    detection_filter:track by_src, count 80, seconds 20;
+    sid:1000109; rev:1;
+)
+
+# Detecta padrao de client_id do ataque automatizado
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Client ID Suspeito)";
+    flow:to_server,established;
+    content:"amplifier_";
+    detection_filter:track by_src, count 80, seconds 20;
+    sid:1000110; rev:1;
+)

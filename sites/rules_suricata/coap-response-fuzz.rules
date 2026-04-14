@@ -1,0 +1,18 @@
+# ========================================
+# Coap Response Fuzz Attack
+# ========================================
+
+# Detecta qualquer origem para qualquer destino
+alert udp any any -> any 5683 (msg:"ATAQUE -> COAP RESPONSE FUZZ (Generico)"; byte_test:1,!=,1,1; classtype:attempted-dos; sid:1007101; rev:1;)
+
+# Detecta direção da rede
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP RESPONSE FUZZ (Direcao)"; byte_test:1,!=,1,1; classtype:attempted-dos; sid:1007102; rev:1;)
+
+# Detecta com validação de tamanho de pacote
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP RESPONSE FUZZ (Validacao de Tamanho)"; dsize:>3; byte_test:1,!=,1,1; classtype:attempted-dos; sid:1007103; rev:1;)
+
+# Detecta com validação de payload
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP RESPONSE FUZZ (Otimizada)"; metadata:service coap; dsize:>3; isdataat:2; byte_test:1,!=,1,1; classtype:attempted-dos; sid:1007104; rev:1;)
+
+# Detecta com verificação estrita de versão do protocolo
+alert udp $EXTERNAL_NET any -> $HOME_NET 5683 (msg:"ATAQUE -> COAP RESPONSE FUZZ (Estrita v1)"; metadata:service coap; dsize:>3; isdataat:2; byte_test:1,&,64,0; byte_test:1,!=,1,1; classtype:attempted-dos; sid:1007105; rev:1;)

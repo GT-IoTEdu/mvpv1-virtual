@@ -1,0 +1,26 @@
+# ===========================================================================
+# Arquivo  : dhcp-starvation.rules (Suricata)
+# Descricao: Deteccao de DHCP Starvation (yersinia -attack 1)
+# Tecnica  : DHCP Discover flood com MACs aleatorios
+# SIDs     : 2920001 – 2920005
+# ===========================================================================
+
+# DHCP Discover broadcast basico (Threshold adicionado para evitar FP em redes normais)
+alert udp any 68 -> 255.255.255.255 67 (msg:"GT-IoTEdu DHCP Starvation - DHCP Discover broadcast flood"; content:"|63 82 53 63|"; content:"|35 01 01|"; threshold: type both, track by_src, count 20, seconds 5; classtype:attempted-dos; sid:2920001; rev:2;)
+
+# DHCP Discover rate alto — 50 em 5s por origem
+alert udp any 68 -> any 67 (msg:"GT-IoTEdu DHCP Starvation - DHCP Discover rate alto 50 em 5s"; content:"|63 82 53 63|"; content:"|35 01 01|"; threshold: type threshold, track by_src, count 50, seconds 5; classtype:attempted-dos; sid:2920002; rev:2;)
+
+# DHCP Request rate alto — fase 2 do starvation
+alert udp any 68 -> any 67 (msg:"GT-IoTEdu DHCP Starvation - DHCP Request rate alto 50 em 5s"; content:"|63 82 53 63|"; content:"|35 01 03|"; threshold: type threshold, track by_src, count 50, seconds 5; classtype:attempted-dos; sid:2920003; rev:2;)
+
+# Flood generico porta DHCP — qualquer volume alto 68->67
+alert udp any 68 -> any 67 (msg:"GT-IoTEdu DHCP Starvation - UDP flood porta DHCP 50 em 5s"; threshold: type threshold, track by_src, count 50, seconds 5; classtype:attempted-dos; sid:2920004; rev:2;)
+
+# DHCP com chaddr (client hardware address) variando — MAC spoofing
+# Detecta pela combinacao de magic cookie + alta taxa sem content fixo
+alert udp any 68 -> any 67 (msg:"GT-IoTEdu DHCP Starvation - DHCP magic cookie flood"; content:"|63 82 53 63|"; threshold: type both, track by_src, count 30, seconds 5; classtype:attempted-dos; sid:2920005; rev:2;)
+
+# ===========================================================================
+# FIM — SIDs 2920001–2920005
+# ===========================================================================

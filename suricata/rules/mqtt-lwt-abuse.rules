@@ -1,0 +1,15 @@
+# ========================================
+# MQTT LWT Abuse Attack
+# ========================================
+
+# Detecta muitas conexoes MQTT em curto intervalo (padrao de abuso de sessao)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT LWT Abuse (Muitas Conexoes)"; flow:to_server; flags:S; detection_filter:track by_src, count 30, seconds 30; sid:1009622; rev:1;)
+
+# Detecta topico de Last Will suspeito no payload MQTT
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT LWT Abuse (Will Topic Suspeito)"; flow:to_server,established; content:"alerts/device/failure"; nocase; detection_filter:track by_src, count 10, seconds 60; sid:1009623; rev:1;)
+
+# Detecta mensagem de Last Will com status de falha de dispositivo
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT LWT Abuse (Will Message Device Failure)"; flow:to_server,established; content:"DEVICE_FAILURE"; nocase; detection_filter:track by_src, count 10, seconds 60; sid:1009624; rev:1;)
+
+# Detecta client_id tipico do ataque automatizado
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT LWT Abuse (Client ID Suspeito)"; flow:to_server,established; content:"critical_sensor_"; nocase; detection_filter:track by_src, count 10, seconds 60; sid:1009625; rev:1;)

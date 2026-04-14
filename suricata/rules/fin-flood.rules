@@ -1,0 +1,6 @@
+# REGRAS DE FLOOD E SCANS ESPECÍFICOS - Suricata
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"FIN FLOOD - Alta taxa de pacotes TCP FIN"; flags:F; threshold: type both, track by_src, count 2000, seconds 10; classtype:denial-of-service; sid:2000002; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"SYN FLOOD - Alta taxa de pacotes TCP SYN"; flags:S; threshold: type both, track by_dst, count 1000, seconds 10; classtype:denial-of-service; sid:2000099; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"NULL SCAN/FLOOD - Nmap ou Hping3 detectado"; flags:0; classtype:attempted-recon; sid:2000004; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"XMAS SCAN/FLOOD - Pacotes com flags FPU"; flags:FPU; classtype:attempted-recon; sid:2000005; rev:1;)

@@ -1,0 +1,22 @@
+alert tcp any any -> any any (
+    msg:"PSH FLOOD - Alta taxa de pacotes TCP PSH";
+    flags:P;
+    detection_filter: track by_src, count 50, seconds 10;
+    classtype:denial-of-service;
+    sid:9000001; rev:2;
+)
+alert tcp any any -> any [80,443,8080,8443] (
+    msg:"PSH FLOOD - Alvo servidor Web";
+    flags:P;
+    detection_filter: track by_src, count 50, seconds 5;
+    classtype:denial-of-service;
+    sid:9000002; rev:2;
+)
+alert tcp any any -> any any (
+    msg:"PSH FLOOD - Pacotes PSH com payload minimo suspeito";
+    flags:P;
+    dsize:1<>10;
+    detection_filter: track by_src, count 50, seconds 5;
+    classtype:denial-of-service;
+    sid:9000004; rev:2;
+)

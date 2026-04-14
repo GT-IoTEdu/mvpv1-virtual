@@ -1,0 +1,8 @@
+# ========================================
+# SMB Enumeration
+# ========================================
+
+# Detecta enumeração SMB (enum4linux, smbclient enumeration, etc)
+alert tcp any any -> any [139,445] (msg:"LOCAL Possivel SMB Enumeration"; flow:to_server,established; content:"|53 4D 42|";detection_filter:track by_src, count 15, seconds 10;classtype:attempted-recon;sid:1000201;rev:1;)
+
+

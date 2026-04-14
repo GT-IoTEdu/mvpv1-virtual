@@ -1,0 +1,7 @@
+# ========================================
+# MQTT Publisher Flood Attack
+# ========================================
+
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Muitas Conexoes)"; flow:to_server; flags:S; detection_filter:track by_src, count 80, seconds 20; sid:1009626; rev:1;)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Payload Suspeito)"; flow:to_server,established; content:"Message with ID:"; detection_filter:track by_src, count 40, seconds 20; sid:1009627; rev:1;)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Topico Sequencial)"; flow:to_server,established; content:"Test "; detection_filter:track by_src, count 40, seconds 20; sid:1009628; rev:1;)

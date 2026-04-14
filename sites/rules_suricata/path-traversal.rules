@@ -1,0 +1,7 @@
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Dot-Dot-Slash)"; flow:to_server,established; http.uri.raw; content:"../"; nocase; classtype:web-application-attack; sid:9000012; rev:1;)
+
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - etc)"; flow:to_server,established; http.uri; pcre:"/\/etc\/(passwd|shadow|group|security|my\.cnf|php\.ini|httpd\.conf)/i"; classtype:web-application-attack; sid:9000013; rev:1;)
+
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - proc)"; flow:to_server,established; http.uri; content:"/proc/self/"; nocase; classtype:web-application-attack; sid:9000014; rev:1;)
+
+alert http any any -> any 8080 (msg:"ATAQUE -> Path Traversal (Arquivo Sensivel - logs)"; flow:to_server,established; http.uri; pcre:"/\/(var\/log|apache\d?\/logs|logs)\/(access|error)[_\.]log/i"; classtype:web-application-attack; sid:9000015; rev:1;)

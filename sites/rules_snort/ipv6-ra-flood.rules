@@ -1,0 +1,18 @@
+# ========================================
+# IPv6 RA Flood
+# ========================================
+
+# ICMPv6 types:
+# - 134 (0x86): Router Advertisement (RA)
+# - 135 (0x87): Neighbor Solicitation (NS)
+
+# Nesta build do Snort 3, o match mais confiavel
+# pra RA foi via header 'ip' com ip_proto 58 + itype/icode
+alert ip any any -> ff02::1 any (msg:"ATAQUE -> IPv6 RA Flood (Alta Frequencia)";
+    flow:stateless;
+    ip_proto:58;
+    itype:134;
+    icode:0;
+    detection_filter:track by_dst, count 80, seconds 5;
+    sid:1009611; rev:11;
+)

@@ -1,0 +1,68 @@
+# ===========================================================================
+# Arquivo  : dhcp-starvation.rules (Snort 3) - OTIMIZADO
+# Descricao: Deteccao de DHCP Starvation com redução de falsos positivos
+# SIDs     : 9230001 – 9230005
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# 1. DHCP Discover: Mudança de 'alert' para 'pass' ou aumento de prioridade
+# A regra original disparava para QUALQUER DHCP Discover na rede. 
+# ---------------------------------------------------------------------------
+# Desativada por padrão para evitar spam de log. Ative apenas para debug.
+# alert udp any 68 -> 255.255.255.255 67 (
+#    msg:"GT-IoTEdu DHCP - Normal Discover Broadcast";
+#    content:"|01|", offset 242, depth 1;
+#    classtype:not-suspicious;
+#    priority:3;
+#    sid:9230001;
+#    rev:3;
+# )
+
+# ---------------------------------------------------------------------------
+# 2. DHCP Discover Flood (Ataque Real)
+# Aumentamos o count para 150 em 10s. Um cliente normal não faz isso.
+# ---------------------------------------------------------------------------
+alert udp any 68 -> any 67 (
+    msg:"GT-IoTEdu DHCP Starvation - Discover Flood Detectado (150/10s)";
+    content:"|63 82 53 63|"; 
+    content:"|35 01 01|", distance 0;
+    detection_filter:track by_src, count 150, seconds 10;
+    classtype:attempted-dos;
+    priority:1;
+    metadata:technique dhcp-starvation;
+    sid:9230003;
+    rev:2;
+)
+
+# ---------------------------------------------------------------------------
+# 3. DHCP Request Flood (Fase de confirmação do Starvation)
+# Um flood de requests indica que o atacante está tentando "limpar" o pool.
+# ---------------------------------------------------------------------------
+alert udp any 68 -> any 67 (
+    msg:"GT-IoTEdu DHCP Starvation - Request Flood Detectado (150/10s)";
+    content:"|35 01 03|";
+    detection_filter:track by_src, count 150, seconds 10;
+    classtype:attempted-dos;
+    priority:1;
+    metadata:technique dhcp-starvation;
+    sid:9230004;
+    rev:2;
+)
+
+# ---------------------------------------------------------------------------
+# 4. Detecção Genérica de Tráfego UDP 67/68 Excessivo
+# Threshold bem alto para pegar ferramentas de brute-force genéricas.
+# ---------------------------------------------------------------------------
+alert udp any 68 -> any 67 (
+    msg:"GT-IoTEdu DHCP Starvation - Suspeita de Flood UDP Porta 67";
+    detection_filter:track by_src, count 300, seconds 10;
+    classtype:attempted-dos;
+    priority:2;
+    metadata:technique dhcp-starvation;
+    sid:9230005;
+    rev:2;
+)
+
+# ===========================================================================
+# FIM — SIDs 9230001–9230005
+# ===========================================================================

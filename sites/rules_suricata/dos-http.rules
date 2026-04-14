@@ -1,0 +1,9 @@
+# ========================================
+# DoS HTTP Attack
+# HTTP DoS
+alert tcp any any -> any [80,443,8080] (msg:"LOCAL DoS HTTP Attack"; flow:established,to_server;detection_filter:track by_src, count 500, seconds 1; classtype: attempted-dos; sid:1000073; rev:1;)
+
+# HTTP GET Flood (DEPOIS de XSS/SQL)
+alert tcp any any -> any [80,443,8080] (msg:"LOCAL HTTP DoS GET Flood";flow:established,to_server;content:"GET"; http_method;detection_filter:track by_src, count 50, seconds 5;classtype:attempted-dos;sid:1000021; rev:2;)
+# HTTP POST Flood
+alert tcp any any -> any [80,443,8080] (msg:"LOCAL HTTP DoS POST Flood";flow:established,to_server;content:"POST"; http_method;detection_filter:track by_src, count 30, seconds 5;classtype:attempted-dos;sid:1000022; rev:2;)

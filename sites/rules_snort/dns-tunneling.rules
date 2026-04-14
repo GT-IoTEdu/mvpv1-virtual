@@ -1,0 +1,176 @@
+# ============================================================================
+# Arquivo  : dns-tunneling.rules  (Snort 3.9.7.0)
+# Descricao: Deteccao de DNS tunneling — arquivo COMPLETO (original + novas)
+#
+# SUBSTITUI o dns-tunneling.rules existente integralmente.
+# Nenhum SID duplicado. Compativel com Snort 3.9.7.0 sem inspetor DNS.
+#
+# Tecnicas cobertas:
+#   - Volume alto de queries UDP (rate-based)
+#   - Pacotes grandes (dsize)
+#   - Encoding de dados em labels: Base32, Hex, Base64url (pcre no payload bruto)
+#   - Profundidade excessiva de subdominio (pcre no payload bruto)
+#   - Tipo de registro suspeito: TXT, NULL, ANY (content bytes)
+#   - Resposta TXT grande (exfiltracao)
+#   - NXDOMAIN em alta frequencia (DGA / tunneling)
+#   - Assinaturas especificas: iodine, dnscat2, dns2tcp, Cobalt Strike
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# BLOCO ORIGINAL — mantido identico
+# ----------------------------------------------------------------------------
+
+# Detecta multiplas queries DNS
+alert udp any any -> any 53 (msg:"ATAQUE -> DNS Tunneling High Volume"; detection_filter:track by_src, count 50, seconds 10; sid:1000033; rev:1;)
+
+# Detecta queries DNS para 8.8.8.8
+alert udp any any -> 8.8.8.8 53 (msg:"ATAQUE -> DNS Queries to 8.8.8.8"; detection_filter:track by_src, count 20, seconds 10; sid:1000034; rev:1;)
+
+# Detecta dominios muito grandes
+alert udp any any -> any 53 (msg:"ATAQUE -> DNS Tunneling Pacote UDP Muito Grande"; flow:to_server; dsize:>200; classtype:policy-violation; sid:1000035; rev:1;)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — encoding de dados em labels (pcre no payload UDP bruto)
+#
+# No wire format DNS cada label e precedido de 1 byte de comprimento:
+#   \x14 = 20 chars, \x20 = 32, \x30 = 48, \x3f = 63 (maximo)
+# A pcre captura: byte_comprimento + conteudo_codificado sem sticky buffer.
+# ----------------------------------------------------------------------------
+# Label Base32 estrito (iodine) — charset [a-z2-7], 20+ chars
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Label Base32 Iodine";
+    pcre:"/[\x14-\x3f][a-z2-7]{20,}/i";
+    classtype:policy-violation;
+    priority:2;
+    metadata:tool iodine, technique dns-tunneling;
+    sid:10000361;
+    rev:1;
+)
+
+# Label hexadecimal estrito (Cobalt Strike / DNSStager) — charset [0-9a-f], 16+ chars
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Label Hex Estrito CobaltStrike/DNSStager";
+    pcre:"/[\x10-\x3f][0-9a-f]{16,}/i";
+    classtype:policy-violation;
+    priority:2;
+    metadata:tool cobalt-strike, technique dns-tunneling;
+    sid:10000371;
+    rev:1;
+)
+
+# Label longo Base64url — charset [A-Za-z0-9-_], 28+ chars
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Label Longo Base64url";
+    pcre:"/[\x1c-\x3f][A-Za-z0-9\-_]{28,}/";
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique dns-tunneling;
+    sid:10000381;
+    rev:1;
+)
+
+# 5+ levels de subdominio no wire format (profundidade atipica em DNS legitimo)
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Profundidade Excessiva 5+ Subdominios";
+    pcre:"/(?:[\x01-\x3f][a-zA-Z0-9\-]{1,63}){5,}\x00/";
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique dns-tunneling;
+    sid:1000039;
+    rev:1;
+)
+
+# dnscat2 — dois labels Base32 encadeados <dados>.<session>.<dominio-c2>
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - dnscat2 Dual Base32 Label Pattern";
+    pcre:"/[\x18-\x30][a-z2-7]{24,48}[\x08-\x18][a-z2-7]{8,24}/i";
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool dnscat2, technique dns-tunneling;
+    sid:1000040;
+    rev:1;
+)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — tipo de registro via bytes no payload
+#
+# Ao final de uma query DNS simples: QTYPE(2 bytes) + QCLASS IN(0x0001)
+# isdataat:!1,relative ancora no fim do payload (queries sem EDNS0)
+# ----------------------------------------------------------------------------
+
+# Query TXT (QTYPE 0x0010) — vetor principal de exfiltracao de dados
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Query TXT Record";
+    content:"|00 10 00 01|";
+    isdataat:!1,relative;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique dns-tunneling;
+    sid:1000041;
+    rev:1;
+)
+
+# Query NULL (QTYPE 0x000A) — vetor preferencial do dnscat2, nunca legitimo
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Query NULL Record dnscat2";
+    content:"|00 0A 00 01|";
+    isdataat:!1,relative;
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool dnscat2, technique dns-tunneling;
+    sid:1000042;
+    rev:1;
+)
+
+# Query ANY (QTYPE 0x00FF) — descontinuado RFC 8482, usado por dns2tcp e iodine
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Query ANY Record dns2tcp/iodine";
+    content:"|00 FF 00 01|";
+    isdataat:!1,relative;
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool dns2tcp, tool iodine, technique dns-tunneling;
+    sid:1000043;
+    rev:1;
+)
+
+# ----------------------------------------------------------------------------
+# BLOCO NOVO — anomalias em respostas DNS
+# ----------------------------------------------------------------------------
+
+# Resposta com indicador TXT (0x0010) e payload grande — dado retornando pelo tunel
+alert udp $HOME_NET 53 -> $EXTERNAL_NET any (
+    msg:"ATAQUE -> DNS Tunneling - Resposta TXT Grande (>150 bytes)";
+    content:"|00 10|";
+    dsize:>150;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique dns-tunneling;
+    sid:1000044;
+    rev:1;
+)
+
+# NXDOMAIN em alta frequencia — flags 0x81 0x83 (QR RD RA RCODE=3)
+alert udp $HOME_NET 53 -> $EXTERNAL_NET any (
+    msg:"ATAQUE -> DNS Tunneling - Alto Rate NXDOMAIN (25/30s) DGA ou Tunneling";
+    content:"|81 83|";
+    detection_filter:track by_dst, count 25, seconds 30;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique dns-tunneling, technique dga;
+    sid:1000045;
+    rev:1;
+)
+
+# dns2tcp — polling continuo: 30 queries TXT em 10s pelo mesmo IP de origem
+alert udp $EXTERNAL_NET any -> $HOME_NET 53 (
+    msg:"ATAQUE -> DNS Tunneling - Rate Alto Queries TXT (30/10s) dns2tcp";
+    content:"|00 10 00 01|";
+    isdataat:!1,relative;
+    detection_filter:track by_src, count 30, seconds 10;
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool dns2tcp, technique dns-tunneling;
+    sid:1000046;
+    rev:1;
+)

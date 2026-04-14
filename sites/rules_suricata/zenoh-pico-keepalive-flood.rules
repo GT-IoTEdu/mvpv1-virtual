@@ -1,0 +1,12 @@
+# ========================================
+# Zenoh Pico Keepalive Flood
+# ========================================
+# O ataque envia rajadas de mensagens KEEP_ALIVE (0x02) via UDP para a porta
+# 7447/UDP (protocolo Zenoh), usando 4 threads x 100 pacotes/lote por 10 segundos,
+# sobrecarregando o roteador Zenoh (eclipse/zenoh) com mensagens de keepalive.
+
+# Alta frequência de KEEP_ALIVE Zenoh (byte 0x02 = Z_MSG_KEEP_ALIVE)
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Keepalive Flood (alta frequencia)"; content:"|02|"; depth:1; detection_filter:track by_src, count 50, seconds 5; classtype:attempted-dos; sid:1000213; rev:1;)
+
+# Flood volumétrico de KEEP_ALIVE Zenoh
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Keepalive Flood (flood extremo)"; content:"|02|"; depth:1; detection_filter:track by_src, count 200, seconds 5; classtype:attempted-dos; sid:1000214; rev:1;)

@@ -1,0 +1,26 @@
+# ========================================
+# MQTT Publisher Flood Attack
+# ========================================
+
+# Detecta muitas conexoes para broker MQTT (alto throughput)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Muitas Conexoes)";
+    flags:S;
+    detection_filter:track by_src, count 80, seconds 20;
+    sid:1000104; rev:1;
+)
+
+# Detecta alta frequencia de payload de publicacao com padrao do ataque
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Payload Suspeito)";
+    flow:to_server,established;
+    content:"Message with ID:";
+    detection_filter:track by_src, count 40, seconds 20;
+    sid:1000105; rev:1;
+)
+
+# Detecta padrao de topico gerado automaticamente pelo script
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT Publisher Flood (Topico Sequencial)";
+    flow:to_server,established;
+    content:"Test ";
+    detection_filter:track by_src, count 40, seconds 20;
+    sid:1000106; rev:1;
+)

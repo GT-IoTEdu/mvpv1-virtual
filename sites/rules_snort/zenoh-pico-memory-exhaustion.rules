@@ -1,0 +1,13 @@
+# ========================================
+# Zenoh Pico Memory Exhaustion
+# ========================================
+# O ataque envia rajadas de frames UDP de tamanho maximo (65535 bytes) com byte
+# de controle 0x20 (Z_MSG_FRAME=0x00 | Z_FLAG_RELIABLE=0x20) para a porta
+# 7447/UDP (protocolo Zenoh), usando 4 threads por 10 segundos para esgotar
+# a memoria do roteador Zenoh (eclipse/zenoh).
+
+# Frame Zenoh de tamanho maximo em alta frequencia (byte 0x20 + payload >60000 bytes)
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Memory Exhaustion (frames grandes)"; byte_test:1,=,32,0; dsize:>60000; detection_filter:track by_src, count 10, seconds 5; classtype:attempted-dos; sid:1000215; rev:1;)
+
+# Flood volumetrico de frames grandes Zenoh
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Memory Exhaustion (flood volumetrico)"; byte_test:1,=,32,0; dsize:>60000; detection_filter:track by_src, count 30, seconds 5; classtype:attempted-dos; sid:1000216; rev:1;)

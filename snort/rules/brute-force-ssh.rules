@@ -1,0 +1,47 @@
+# SSH BRUTE FORCE - Snort3
+# nocase removido (incompativel com esta versao) - strings SSH sao case-sensitive
+
+
+# Detecta múltiplas tentativas SSH (sintaxe simplificada)
+alert tcp any any -> any 2222 (msg:"ATAQUE -> SSH Brute Force"; content:"SSH-2.0"; detection_filter:track by_src, count 10, seconds 60; sid:1000025; rev:1;)
+
+# Detecta tentativas rápidas de conexão SSH
+alert tcp any any -> any 2222 (msg:"ATAQUE -> SSH Multiple Connections"; flags:S; detection_filter:track by_src, count 20, seconds 30; sid:1000026; rev:1;)
+
+alert tcp any any -> any 22 (
+    msg:"SSH BRUTE FORCE - Multiplas tentativas porta 22";
+    flags:S;
+    detection_filter: track by_src, count 10, seconds 60;
+    classtype:attempted-admin;
+    sid:9002001; rev:4;
+)
+alert tcp any any -> any 2222 (
+    msg:"SSH BRUTE FORCE - Multiplas tentativas porta 2222";
+    flags:S;
+    detection_filter: track by_src, count 10, seconds 60;
+    classtype:attempted-admin;
+    sid:9002002; rev:4;
+)
+alert tcp any any -> any [22,2222] (
+    msg:"SSH BRUTE FORCE - Ferramenta Hydra/libssh detectada";
+    flow:to_server,established;
+    content:"libssh";
+    detection_filter: track by_src, count 5, seconds 60;
+    classtype:attempted-admin;
+    sid:9002003; rev:4;
+)
+alert tcp any any -> any [22,2222] (
+    msg:"SSH BRUTE FORCE - Ferramenta Ncrack detectada";
+    flow:to_server,established;
+    content:"Ncrack";
+    detection_filter: track by_src, count 3, seconds 30;
+    classtype:attempted-admin;
+    sid:9002004; rev:4;
+)
+alert tcp any any -> any [22,2222] (
+    msg:"SSH BRUTE FORCE - Ataque distribuido SSH";
+    flags:S;
+    detection_filter: track by_dst, count 30, seconds 60;
+    classtype:attempted-admin;
+    sid:9002005; rev:4;
+)

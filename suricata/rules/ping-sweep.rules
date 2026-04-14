@@ -1,0 +1,3 @@
+# validar
+# alert icmp any any -> any any (msg:"TESTE -> ICMP"; sid:2000041; rev:1;)
+alert icmp any any -> $HOME_NET any (msg:"ATAQUE -> ICMP Ping Sweep"; itype:8; detection_filter:track by_src, count 30, seconds 5; classtype:attempted-recon; sid:2000040; rev:6;)

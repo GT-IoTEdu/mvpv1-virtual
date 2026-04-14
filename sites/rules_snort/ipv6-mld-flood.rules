@@ -1,0 +1,15 @@
+# ========================================
+# IPv6 MLD Flood
+# ========================================
+
+# Contexto:
+# - O flood MLD observado (tcpdump) envia muitos pacotes IPv6 p/ grupo multicast ff02::2
+# - Objetivo aqui: detectar tanto ocorrencia quanto volumetria em janela curta
+
+# Dispara para qualquer pacote IPv6 destinado a ff02::2.
+# Serve como indicador imediato de evento MLD no ambiente.
+#alert ip any any -> ff02::2 any (msg:"ATAQUE -> IPv6 MLD Flood (MLD Report para ff02::2)"; flow:stateless; sid:1009607; rev:1;)
+
+# `track by_dst` pq o ataque pode randomizar origem,
+# mas destino multicast (ff02::2) se mantem constante.
+alert ip any any -> ff02::2 any (msg:"ATAQUE -> IPv6 MLD Flood (Alta Frequencia)"; flow:stateless; detection_filter:track by_dst, count 80, seconds 5; sid:1009608; rev:1;)

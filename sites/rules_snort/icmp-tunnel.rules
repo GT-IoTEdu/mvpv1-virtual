@@ -1,0 +1,167 @@
+# ===========================================================================
+# Arquivo  : icmp-tunnel.rules
+# Descrição: Detecção de tunelamento de dados via ICMP
+# Protocolo: ICMP (itype 8=Echo Request, 0=Echo Reply)
+# Alvo     : Ferramentas icmptunnel, ptunnel, icmpsh, Hans, PingTunnel
+#
+# Fundamento: ICMP Echo normal tem payload de 32-56 bytes (padrão OS).
+# Túneis ICMP carregam dados encapsulados, gerando payloads grandes,
+# alta frequência, padrões de bytes atípicos ou IPs encapsulados.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# SID 9400001 — Echo Request com payload grande (> 100 bytes)
+# Ping normal: Windows=32b, Linux=56b, macOS=56b.
+# Payload > 100 bytes indica dados encapsulados.
+# ---------------------------------------------------------------------------
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - Echo Request payload grande (>100 bytes)";
+    itype:8;
+    dsize:>100;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique icmp-tunneling;
+    sid:9400001;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400002 — Echo Reply com payload grande (> 100 bytes)
+# O servidor do túnel responde com dados encapsulados no Reply.
+# ---------------------------------------------------------------------------
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - Echo Reply payload grande (>100 bytes)";
+    itype:0;
+    dsize:>100;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique icmp-tunneling;
+    sid:9400002;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400003 — Payload muito grande (> 512 bytes) — túnel ativo/transferência
+# Indica sessão de túnel estabelecida transferindo dados.
+# ---------------------------------------------------------------------------
+alert icmp any any -> any any (
+    msg:"GT-IoTEdu ICMP Tunnel - Payload MUITO grande (>512 bytes) sessao ativa";
+    itype:8;
+    dsize:>512;
+    classtype:policy-violation;
+    priority:1;
+    metadata:technique icmp-tunneling, severity high;
+    sid:9400003;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400004 — Magic bytes do ptunnel (0xD5200880)
+# O ptunnel usa este identificador fixo nos primeiros bytes do payload ICMP.
+# Ref: https://github.com/izder456/ptunnel-ng
+# ---------------------------------------------------------------------------
+alert icmp any any -> any any (
+    msg:"GT-IoTEdu ICMP Tunnel - Magic bytes ptunnel detectados";
+    itype:8;
+    content:"|D5 20 08 80|";
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool ptunnel, technique icmp-tunneling;
+    sid:9400005;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400006 — Possível IP encapsulado no payload ICMP (icmptunnel)
+# A ferramenta icmptunnel encapsula frames IP completos no payload.
+# Cabeçalho IPv4 começa com 0x45 (Version=4, IHL=5).
+# Detecta quando o payload ICMP parece conter um cabeçalho IP válido.
+# ---------------------------------------------------------------------------
+alert icmp any any -> any any (
+    msg:"GT-IoTEdu ICMP Tunnel - Possivel IP encapsulado no payload (icmptunnel)";
+    itype:8;
+    content:"|45 00|";
+    dsize:>28;
+    classtype:policy-violation;
+    priority:1;
+    metadata:tool icmptunnel, technique icmp-tunneling;
+    sid:9400006;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400007 — icmpsh: shell reverso sobre ICMP
+# O icmpsh envia comandos no Echo Request e recebe output no Reply.
+# Payload contém strings típicas de shell (cmd.exe, /bin/sh, $).
+# ---------------------------------------------------------------------------
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - icmpsh possivel shell reverso (cmd.exe)";
+    itype:8;
+    content:"cmd.exe";
+    classtype:shellcode-detect;
+    priority:1;
+    metadata:tool icmpsh, technique icmp-reverse-shell;
+    sid:9400007;
+    rev:1;
+)
+
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - icmpsh possivel shell reverso (/bin/sh)";
+    itype:8;
+    content:"/bin/sh";
+    classtype:shellcode-detect;
+    priority:1;
+    metadata:tool icmpsh, technique icmp-reverse-shell;
+    sid:9400008;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400009 — Flood de Echo Requests de um único IP (20/segundo)
+# Taxa normal de ping: 1/s. Taxa de túnel: dezenas a centenas por segundo.
+# Cobre tanto tunelamento quanto ping flood.
+# ---------------------------------------------------------------------------
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel/Flood - Taxa alta de Echo Requests (20/1s)";
+    itype:8;
+    detection_filter:track by_src, count 20, seconds 1;
+    classtype:attempted-dos;
+    priority:2;
+    metadata:technique icmp-tunneling;
+    sid:9400009;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400010 — ICMP com TTL suspeito (TTL=255 fixo — ferramenta automatizada)
+# Ferramentas de túnel frequentemente usam TTL fixo não-padrão.
+# ttl:255 é incomum em hosts normais mas comum em ferramentas de túnel.
+# ---------------------------------------------------------------------------
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - TTL=255 com payload grande (ferramenta automatizada)";
+    itype:8;
+    ttl:255;
+    dsize:>64;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique icmp-tunneling;
+    sid:9400010;
+    rev:1;
+)
+
+# ---------------------------------------------------------------------------
+# SID 9400011 — Echo Reply sem Echo Request correspondente
+# Em túneis reversos, o cliente envia Replies espontâneos sem ter
+# recebido um Request — comportamento impossível em ping legítimo.
+# Detecta via rate: muitos Replies de um host interno para externo.
+# ---------------------------------------------------------------------------
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu ICMP Tunnel - Multiplos Echo Reply sem Request (tunel reverso)";
+    itype:0;
+    detection_filter:track by_src, count 15, seconds 5;
+    classtype:policy-violation;
+    priority:2;
+    metadata:technique icmp-reverse-tunnel;
+    sid:9400011;
+    rev:1;
+)

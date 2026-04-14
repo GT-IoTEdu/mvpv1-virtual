@@ -1,0 +1,4 @@
+# REGRAS DE RST (RESET) FLOOD - Suricata
+
+alert tcp any any -> any any (msg:"RST FLOOD - Alta taxa de pacotes TCP RST"; flags:R; threshold: type both, track by_src, count 50, seconds 10; classtype:denial-of-service; sid:2000010; rev:1;)
+alert tcp any any -> any any (msg:"RST FLOOD - Possivel TCP Reset Attack / TearDown"; flags:R; threshold: type both, track by_dst, count 50, seconds 5; classtype:attempted-dos; sid:2000011; rev:1;)

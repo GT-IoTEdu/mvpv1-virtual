@@ -1,0 +1,8 @@
+# ========================================
+# MQTT QoS Amplification Attack
+# ========================================
+
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Muitas Conexoes)"; flow:to_server; flags:S; detection_filter:track by_src, count 200, seconds 20; sid:1009629; rev:1;)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Topico Alvo)"; flow:to_server,established; content:"amp/target"; detection_filter:track by_src, count 80, seconds 20; sid:1009630; rev:1;)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Payload QoS2)"; flow:to_server,established; content:"QoS2_Amplified_"; detection_filter:track by_src, count 80, seconds 20; sid:1009631; rev:1;)
+alert tcp any any -> any 1883 (msg:"ATAQUE -> MQTT QoS Amplification (Client ID Suspeito)"; flow:to_server,established; content:"amplifier_"; detection_filter:track by_src, count 80, seconds 20; sid:1009632; rev:1;)

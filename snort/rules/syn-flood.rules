@@ -1,0 +1,12 @@
+# ========================================
+# SYN Flood
+# ========================================
+
+alert tcp any any -> any [80,443,8080] (
+    msg:"ATAQUE -> SYN Flood Detected";
+    flags:S;
+    flow:stateless;
+    detection_filter:track by_dst, count 20, seconds 1;
+    sid:1000068;
+    rev:1;
+)

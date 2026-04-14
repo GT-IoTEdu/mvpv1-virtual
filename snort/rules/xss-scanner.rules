@@ -1,0 +1,65 @@
+# ========================================
+# XSS Scanner Detection (DalFox)
+# ========================================
+
+# --- Detecção por Payload (tags e handlers na URI) ---
+
+# Detecta <script injetado na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Script Tag na URI)"; http_uri; content:"<script", nocase; sid:1000111; rev:1;)
+
+# Detecta event handler onerror= na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Event Handler onerror na URI)"; http_uri; content:"onerror=", nocase; sid:1000112; rev:1;)
+
+# Detecta event handler onload= na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Event Handler onload na URI)"; http_uri; content:"onload=", nocase; sid:1000113; rev:1;)
+
+# Detecta prompt() na URI (payload padrão do DalFox)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (prompt() na URI)"; http_uri; content:"prompt(", nocase; sid:1000114; rev:1;)
+
+# Detecta alert() na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (alert() na URI)"; http_uri; content:"alert(", nocase; sid:1000115; rev:1;)
+
+# Detecta protocolo javascript: na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (javascript: na URI)"; http_uri; content:"javascript:", nocase; sid:1000116; rev:1;)
+
+# Detecta <svg na URI (comum em payloads XSS modernos)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (SVG Tag na URI)"; http_uri; content:"<svg", nocase; sid:1000117; rev:1;)
+
+# Detecta <iframe na URI
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (iframe Tag na URI)"; http_uri; content:"<iframe", nocase; sid:1000047; rev:1;)
+
+# Detecta eval() na URI (execução dinâmica de código)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (eval() na URI)"; http_uri; content:"eval(", nocase; sid:1000048; rev:1;)
+
+# --- Detecção Double-Encoded (após 1 decode do http_inspect, %253C vira %3C) ---
+
+# Double-encoded <script (%253Cscript → %3Cscript na http_uri)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc Script Tag)"; http_uri; content:"%3Cscript", nocase; sid:1000050; rev:1;)
+
+# Double-encoded <svg
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc SVG Tag)"; http_uri; content:"%3Csvg", nocase; sid:1000051; rev:1;)
+
+# Double-encoded <iframe
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc iframe Tag)"; http_uri; content:"%3Ciframe", nocase; sid:1000052; rev:1;)
+
+# Double-encoded <img
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc img Tag)"; http_uri; content:"%3Cimg", nocase; sid:1000053; rev:1;)
+
+# Double-encoded closing tags (</body>, </html> - reflection test do DalFox)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc Closing Tag)"; http_uri; content:"%3C%2F", nocase; sid:1000054; rev:1;)
+
+# Double-encoded prompt( — payload padrão DalFox com encoding extra
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Double-Enc prompt())"; http_uri; content:"%28", nocase; content:"prompt", nocase; sid:1000055; rev:1;)
+
+# --- Detecção HTML Entity Encoded (DalFox usa &lt; &gt; encoded) ---
+
+# HTML entity < encoded como &lt; (%26lt%3B → &lt; na http_uri)
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (HTML Entity LT na URI)"; http_uri; content:"&lt", nocase; sid:1000056; rev:2;)
+
+# HTML entity > encoded como &gt;
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (HTML Entity GT na URI)"; http_uri; content:"&gt", nocase; sid:1000057; rev:2;)
+
+# --- Detecção Comportamental (volume de probes) ---
+
+# Alta frequência de requisições com `<` na URI indica scanner XSS
+alert http any any -> any $HTTP_PORTS (msg:"ATAQUE -> XSS (Scanner Alta Frequência)"; http_uri; content:"<"; detection_filter:track by_src, count 30, seconds 10; sid:1000049; rev:1;)

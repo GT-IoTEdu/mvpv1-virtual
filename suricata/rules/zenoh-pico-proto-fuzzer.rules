@@ -1,0 +1,14 @@
+# ========================================
+# Zenoh Pico Protocol Fuzzer
+# ========================================
+# O ataque envia 10000 mensagens UDP mutadas/aleatorizadas para a porta 7447/UDP
+# usando 6 estratégias de fuzzing (FUZZ_RANDOM, FUZZ_VALID_HEADER, FUZZ_OVERFLOW,
+# FUZZ_UNDERFLOW, FUZZ_INJECTION, FUZZ_MALFORMED) com 1ms entre envios para
+# causar erros e crashes no roteador Zenoh.
+
+# FUZZ_UNDERFLOW: pacotes de 1 byte (byte_test ancora 0x00-0x06 = tipos Zenoh válidos mutados) em alta frequência
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Proto Fuzzer (underflow - pacotes minimos 1 byte)"; byte_test:1,<,7,0; dsize:1; detection_filter:track by_src, count 5, seconds 5; classtype:attempted-dos; sid:1000217; rev:2;)
+
+# FUZZ_OVERFLOW: primeiro fragmento IP (~1472 bytes) com header FRAME (0x00) + sequência máxima (0xFF...)
+# Pacote de 4096 bytes é fragmentado pelo MTU 1500 do docker0; dsize:>1400 detecta o primeiro fragmento
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Proto Fuzzer (overflow - pacotes maximos 4096 bytes)"; content:"|00 FF FF FF FF|"; depth:5; dsize:>1400; detection_filter:track by_src, count 5, seconds 5; classtype:attempted-dos; sid:1000218; rev:2;)

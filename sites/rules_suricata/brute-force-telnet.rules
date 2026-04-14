@@ -1,0 +1,7 @@
+# ========================================
+# Telnet Brute Force Attack
+# ========================================
+
+# Telnet brute-force: many SYNs to TCP/23 from same src (tentativas rápidas)
+
+alert tcp any any -> $HOME_NET 2323 (msg:"LOCAL TELNET Brute-Force - multiple SYNs to Telnet port"; flow:to_server,stateless; flags:S; threshold:type both, track by_src, count 10, seconds 60; sid:10000010; rev:2;)

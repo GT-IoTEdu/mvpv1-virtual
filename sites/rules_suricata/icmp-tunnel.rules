@@ -1,0 +1,9 @@
+# ICMP Tunnel Detection - payload anormalmente grande
+alert icmp any any -> $HOME_NET any (msg:"ICMP Tunnel Large Payload"; itype:8; dsize:>200; sid:10000401; rev:1;)
+
+# ICMP carregando tráfego HTTP
+alert icmp any any -> $HOME_NET any (msg:"ICMP Tunnel HTTP Pattern"; itype:8; content:"GET /"; sid:10000402; rev:1;)
+alert icmp any any -> $HOME_NET any (msg:"ICMP Tunnel HTTP POST"; itype:8; content:"POST /"; sid:10000403; rev:1;)
+
+# ICMP carregando tráfego SSH
+alert icmp any any -> $HOME_NET any (msg:"ICMP Tunnel SSH Pattern"; itype:8; content:"SSH-"; sid:10000404; rev:1;)

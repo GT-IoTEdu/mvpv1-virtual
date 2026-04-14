@@ -1,0 +1,17 @@
+# ========================================
+# Zenoh Pico Fragment Bomb
+# ========================================
+# O ataque envia fragmentos UDP incompletos com byte de controle 0x61
+# (Z_MSG_FRAGMENT=0x01 | Z_FLAG_MORE=0x40 | Z_FLAG_RELIABLE=0x20) para a porta
+# 7447/UDP (protocolo Zenoh), com Z_FLAG_MORE sempre setada e sem fragmento final,
+# esgotando os buffers de remontagem do roteador Zenoh (eclipse/zenoh).
+# Origem: 4 threads x 50 fragmentos/lote, tamanhos 512/1024/2048 bytes.
+
+# Fragmento incompleto Zenoh em alta frequencia (byte 0x61 = MORE sempre setado)
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Fragment Bomb (fragmentos incompletos)"; byte_test:1,=,97,0; detection_filter:track by_src, count 50, seconds 5; classtype:attempted-dos; sid:1000210; rev:2;)
+
+# Fragmento Zenoh grande (>= 512 bytes) com flag MORE sempre setada
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh Fragment Bomb (fragmento grande incompleto)"; byte_test:1,=,97,0; dsize:>512; classtype:attempted-dos; sid:1000211; rev:2;)
+
+# Flood volumetrico de UDP na porta Zenoh independente de conteudo
+alert udp any any -> any 7447 (msg:"ATAQUE -> Zenoh UDP Flood (alta frequencia porta 7447)"; detection_filter:track by_src, count 200, seconds 5; classtype:attempted-dos; sid:1000212; rev:2;)

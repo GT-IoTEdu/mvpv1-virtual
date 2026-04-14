@@ -1,0 +1,7 @@
+# ========================================
+# Telnet Brute Force Attack
+# ========================================
+
+# Telnet brute-force: many SYNs to TCP/23 from same src (tentativas rápidas)
+
+alert tcp any any -> any 2323 (msg:"ATAQUE -> TELNET Brute-Force"; detection_filter:track by_src, count 400, seconds 1; sid:10000010; rev:1;)

@@ -1,0 +1,216 @@
+# ===========================================================================
+# Arquivo  : web-wide-scanner.rules
+# Descrição: Detecção de scanners web agressivos / amplos
+# Fix v3   : Removido nocase standalone; pcre sem modificador H (Snort 2);
+#            sticky buffer http_header já aplica o contexto correto.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# User-Agents de scanners agressivos (case conforme enviado pela ferramenta)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - User-Agent nuclei detectado";
+    flow:to_server,established;
+    http_header;
+    content:"nuclei";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:tool nuclei, technique wide-web-scan;
+    sid:9300001;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - User-Agent masscan detectado";
+    flow:to_server,established;
+    http_header;
+    content:"masscan";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique wide-web-scan;
+    sid:9300002;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - User-Agent zgrab detectado";
+    flow:to_server,established;
+    http_header;
+    content:"zgrab";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique wide-web-scan;
+    sid:9300003;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - User-Agent Go-http-client em alta taxa";
+    flow:to_server,established;
+    http_header;
+    content:"Go-http-client";
+    detection_filter:track by_src, count 20, seconds 5;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique wide-web-scan;
+    sid:9300004;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - User-Agent python-requests em alta taxa";
+    flow:to_server,established;
+    http_header;
+    content:"python-requests";
+    detection_filter:track by_src, count 30, seconds 5;
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique wide-web-scan;
+    sid:9300005;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Rate-based: flood de requisicoes (varredura agressiva)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Rate ALTO GET (300/10s) varredura agressiva";
+    flow:to_server,established;
+    http_method;
+    content:"GET";
+    detection_filter:track by_src, count 300, seconds 10;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique wide-web-scan, severity high;
+    sid:9300010;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Rate ALTO POST (100/10s) possivel fuzzing";
+    flow:to_server,established;
+    http_method;
+    content:"POST";
+    detection_filter:track by_src, count 100, seconds 10;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique web-fuzzing;
+    sid:9300011;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Payloads de Path Traversal em URI
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Path Traversal em URI";
+    flow:to_server,established;
+    http_uri;
+    pcre:"/(\.\.\/|\.\.\\\\|%2e%2e%2f|%252e%252e)/i";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique path-traversal;
+    sid:9300020;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Payloads XSS em URI
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Payload XSS em URI";
+    flow:to_server,established;
+    http_uri;
+    pcre:"/(%3cscript|alert%28|javascript%3a)/i";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique xss-probe;
+    sid:9300021;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Payload SQL Injection em URI
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Payload SQLi em URI";
+    flow:to_server,established;
+    http_uri;
+    pcre:"/(union(\s|%20)+select|or(\s|%20)+1(\s|%20)*=(\s|%20)*1)/i";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique sqli-probe;
+    sid:9300022;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Probes de CVEs conhecidos
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Sonda ShellShock (CVE-2014-6271)";
+    flow:to_server,established;
+    http_header;
+    content:"() {";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:cve CVE-2014-6271, technique shellshock;
+    sid:9300023;
+    rev:3;
+)
+
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Sonda Log4Shell (CVE-2021-44228)";
+    flow:to_server,established;
+    http_header;
+    content:"${jndi:";
+    classtype:attempted-recon;
+    priority:1;
+    metadata:cve CVE-2021-44228, technique log4shell;
+    sid:9300024;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# Rate-based: multiplos erros 404/403
+# ---------------------------------------------------------------------------
+alert http $HOME_NET $HTTP_PORTS -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu Web Wide Scanner - Multiplos 404 (80/20s) enumeracao ampla";
+    flow:to_client,established;
+    http_stat_code;
+    content:"404";
+    detection_filter:track by_dst, count 80, seconds 20;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique directory-enumeration, severity high;
+    sid:9300030;
+    rev:3;
+)
+
+alert http $HOME_NET $HTTP_PORTS -> $EXTERNAL_NET any (
+    msg:"GT-IoTEdu Web Wide Scanner - Multiplos 403 (80/20s) enumeracao ampla";
+    flow:to_client,established;
+    http_stat_code;
+    content:"403";
+    detection_filter:track by_dst, count 80, seconds 20;
+    classtype:attempted-recon;
+    priority:1;
+    metadata:technique directory-enumeration, severity high;
+    sid:9300031;
+    rev:3;
+)
+
+# ---------------------------------------------------------------------------
+# VHost fuzzing (pcre sem modificador H - sticky buffer ja define contexto)
+# ---------------------------------------------------------------------------
+alert http $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (
+    msg:"GT-IoTEdu Web Wide Scanner - Possivel VHost fuzzing (Host header suspeito)";
+    flow:to_server,established;
+    http_header;
+    pcre:"/Host\x3a\s*(dev\.|staging\.|internal\.|test\.|admin\.)/i";
+    classtype:attempted-recon;
+    priority:2;
+    metadata:technique vhost-fuzzing;
+    sid:9300040;
+    rev:3;
+)

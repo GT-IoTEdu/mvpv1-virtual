@@ -1,0 +1,45 @@
+# ========================================
+# Detecção de UDP Flood
+# ========================================
+
+# --- UDP GENÉRICO ---
+
+# Volume alto independente de tamanho (mantém cobertura ampla)
+alert udp any any -> any any (msg:"ATAQUE -> UDP Flood (Genérico, alto volume)"; detection_filter:track by_src, count 10000, seconds 5; sid:1000063; rev:3;)
+
+# Pacotes pequenos em volume moderado — padrão típico de hping3/ferramentas de flood
+# Tráfego legítimo UDP tem tamanho variado; flood tem tamanho fixo e pequeno.
+# Threshold menor é justificado porque variância zero de tamanho é anomalia.
+alert udp any any -> any any (msg:"ATAQUE -> UDP Flood (pacotes pequenos, possivel hping3)"; dsize:<100; detection_filter:track by_src, count 10000, seconds 5; sid:1000070; rev:1;)
+
+# Pacotes grandes em volume moderado — possível flood de bandwidth (amplificação ou UDP grande)
+# QUIC tem pacotes grandes MAS com tamanho variado; flood de pacotes grandes tende a ser uniforme.
+alert udp any any -> any any (msg:"ATAQUE -> UDP Flood (pacotes grandes, possivel amplificacao)"; dsize:>1000; detection_filter:track by_src, count 10000, seconds 5; sid:1000071; rev:1;)
+
+# --- NTP (123) ---
+
+# Monlist query flood: pacote minúsculo (~8 bytes) para NTP = sinal claro de ataque
+# Cliente NTP legítimo nunca manda múltiplas queries por segundo.
+alert udp any any -> any 123 (msg:"ATAQUE -> NTP Amplification Query (monlist, pacotes minusculos)"; dsize:<50; detection_filter:track by_src, count 10, seconds 10; sid:1000065; rev:3;)
+
+# Amplification response: respostas NTP grandes chegando na vítima
+# NTP response legítima é ~48 bytes; monlist response pode ser 4.000+ bytes.
+alert udp any 123 -> any any (msg:"ATAQUE -> NTP Amplification (respostas grandes, vitima sob ataque)"; dsize:>200; detection_filter:track by_dst, count 20, seconds 10; sid:1000069; rev:1;)
+
+
+# --- CoAP (5683) ---
+
+# CoAP flood: sensor IoT legítimo manda pacotes pequenos esporadicamente.
+# Flood usa pacotes pequenos em volume alto — threshold pode ser agressivo aqui
+# porque o protocolo é naturalmente de baixo volume.
+alert udp any any -> any 5683 (msg:"ATAQUE -> CoAP Flood (volume anomalo para IoT)"; dsize:<200; detection_filter:track by_src, count 30, seconds 10; sid:1000067; rev:3;)
+
+
+# --- PORTAS ALTAS (>=1024) ---
+
+# Volume alto (cobre QUIC com margem — veja nota abaixo)
+alert udp any any -> any 1024: (msg:"ATAQUE -> UDP Flood (Porta Alta, alto volume)"; detection_filter:track by_src, count 10000, seconds 5; sid:1000066; rev:3;)
+
+# Pacotes pequenos em portas altas: QUIC legítimo usa pacotes variados e grandes.
+# Pacotes uniformemente pequenos em porta alta = flood sintético.
+alert udp any any -> any 1024: (msg:"ATAQUE -> UDP Flood (Porta Alta, pacotes pequenos suspeitos)"; dsize:<100; detection_filter:track by_src, count 500, seconds 5; sid:1000072; rev:1;)
