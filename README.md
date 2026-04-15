@@ -14,24 +14,18 @@ Sistema integrado para gerenciamento seguro de dispositivos IoT em ambientes aca
 - 📊 Painel administrativo de dispositivos IoTs cadastrados
 
 
-# 🚀 Guia Completo de Instalação
-
-  
-
-Este guia detalha o processo completo de instalação do sistema do zero, incluindo banco de dados vazio e pfSense sem configurações.
-
-  
-
-## 📋 Pré-requisitos
-
-  
+ 
 
  
 
-  
+# Instalação  
 
 ## 🔧 Passo 1: Preparar Ambiente
 
+```bash
+git clone https://github.com/GT-IoTEdu/wticifes2026-iotedu.git
+cd API_SBRC26_SF
+```
   
 
 ###  Opcional: Usar um ambiente virtual
