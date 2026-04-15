@@ -237,14 +237,15 @@ Para exportar o arquivo OVA vá em arquivos->importar appliance e selecione o ar
 
  <img width="950" height="375" alt="pfsense_bridge2" src="https://github.com/user-attachments/assets/2488ce95-7a8d-4d64-a0d5-8d959970561a" />
 
-### 2.4. No mesmo menu garanta que a interface 1 esteja na sua interface da placa de rede
- <img width="1013" height="368" alt="image" src="https://github.com/user-attachments/assets/d1d17a16-1c21-41fd-bca9-5fbacc65218c" />
+### 2.4. No mesmo menu de redes garanta que a interface 1 esteja na sua interface da placa de rede
+ <img width="1014" height="577" alt="image" src="https://github.com/user-attachments/assets/27d6f3b7-1e04-49fd-ad61-519f0a52cb7c" />
 
 
 ### 2.5. Inicie a VM do pfsense, e ao segunda opção, então 1 e responda sim para todas as perguntas
 <img width="512" height="444" alt="image" src="https://github.com/user-attachments/assets/87b06d0f-efbd-41fb-8936-90b3e480c7cb" />
 
 ### 2.6 Como resultado a wan tera um endereço ip que pode ser acessado no seu navegador, uma vez lá navegue até a interface LAN
+<img width="720" height="462" alt="image" src="https://github.com/user-attachments/assets/f769314e-1346-40a3-be21-4c62cd4d62c2" />
 
 <img width="1017" height="626" alt="image" src="https://github.com/user-attachments/assets/9fb26554-1baf-47be-9d56-60eb0d2e1420" />
 O usuário é admin e a senha pfsense
