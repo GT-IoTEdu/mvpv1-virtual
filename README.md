@@ -35,6 +35,18 @@ Sistema integrado para gerenciamento seguro de dispositivos IoT em ambientes aca
 | SO | Ubuntu / Kubuntu 24.04 LTS (bare-metal) |
 # Instalação  
 
+
+### Dependências do Sistema Operacional
+
+Antes de instalar os pacotes Python, instale as bibliotecas de sistema necessárias. No Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install -y \
+    python3 python3-pip python3-venv python3-dev \
+    libxml2-dev libxmlsec1-dev libxmlsec1-openssl \
+    default-libmysqlclient-dev build-essential pkg-config
+```
 ## 🔧 Passo 1: Preparar Ambiente
 
 ```bash
