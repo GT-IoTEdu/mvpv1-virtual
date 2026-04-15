@@ -265,6 +265,7 @@ deploy_atacante-alvo.sh
  ```bash
 docker exec -it atacante ping 8.8.8.8
 ```
+tente desbloquear o dispositivo enquanto o comando está rodando
 
 
 ## Licença
