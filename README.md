@@ -232,6 +232,12 @@ uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 
 ### 1.2 Faça o login via conta google com o super usuário registrado no env
 <img width="1021" height="738" alt="image" src="https://github.com/user-attachments/assets/8574ccfc-81e0-4e09-82ca-a10a2a972fb8" />
+Va até a aba instituições
+<img width="943" height="652" alt="image" src="https://github.com/user-attachments/assets/ffe2ada5-a4cc-4728-bcc2-58a6aef0476f" />
+E modifique o ip do pfsense para o da sua web interface
+<img width="943" height="652" alt="image" src="https://github.com/user-attachments/assets/5ced41ed-f8da-4df9-a615-738b567882ce" />
+Para utilizar as outras ids copie os campos do zeek para o suricata e snort
+<img width="935" height="422" alt="image" src="https://github.com/user-attachments/assets/a0d01203-ee91-4091-9427-4e089a5fedc4" />
 
  
 os campos do zeek e suricata são os mesmo com o url sendo: http://host.docker.internal:8001 e chave: a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
