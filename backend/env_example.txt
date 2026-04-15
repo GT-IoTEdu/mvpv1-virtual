@@ -39,8 +39,8 @@ IP_RANGE_EXCLUDED=192.168.100.1,192.168.100.100,192.168.100.200
 # O sistema verificará automaticamente se o email autenticado via Google corresponde ao SUPERUSER_ACCESS.
 SUPERUSER_ACCESS=admin@iotedu.local
 # ADMIN_PASSWORD não é mais necessário - removido para usar apenas Google OAuth
-GOOGLE_CLIENT_ID=662697971276-djg8lfampup0rk37vff4vccbb4o92t5u.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID= 
+GOOGLE_CLIENT_SECRET= 
 
 # Configurações de email (opcional)
 EMAIL_HOST=smtp.gmail.com
