@@ -130,8 +130,15 @@ Este arquivo detalha os passos de instalação do pfsense e alternativamente uma
 Como resultado a wan tera um endereço ip que pode ser acessado no seu navegador, uma vez lá navegue até a interface LAN
 
 <img width="1017" height="626" alt="image" src="https://github.com/user-attachments/assets/9fb26554-1baf-47be-9d56-60eb0d2e1420" />
+Gerar a chave de API
+
+1. Vá em **System → REST API → Keys**.
+2. Clique em **Add** e selecione o tipo **SHA256** com tamanho **32** (utilize 16 ou 32 — 36 não é um tamanho válido).
+3. Copie a chave gerada e insira no campo `PFSENSE_API_KEY` do arquivo `backend/.env`.
+
 
 ### 2.6. Atribua um ip estatico ipv4 para a LAN
+
 
 <img width="1017" height="211" alt="image" src="https://github.com/user-attachments/assets/ce3f9d21-787a-4581-9c8e-1fb93439b43c" />
 
