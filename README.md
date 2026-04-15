@@ -190,58 +190,29 @@ Para instalar o virtualbox acesse https://www.virtualbox.org/wiki/Downloads e es
 
 ### 2.2. Instale a imagem do pfsense
 Este arquivo detalha os passos de instalação do pfsense e alternativamente uma imagem pronta para o virtualbox:
-
-PASSO A PASSO:[Instalacao_PFSense.pdf](https://github.com/user-attachments/files/26728713/Instalacao_PFSense.pdf) 
+ 
 
 
 IMAGEM PRONTA:[imagem pronta](https://drive.google.com/file/d/1Q9IO_MZtKf6JvTIgJVl-p2nDt5d_ohEj/view?usp=sharing)  
 
 
-Caso selecione a imagem pronta siga apenas o passo 2.4 e 2.6.
+ 
 
 Para exportar o arquivo OVA vá em arquivos->importar appliance e selecione o arquivo OVA.
 
-### 2.3. Trocar no Virtualbox para que a interface 2 do pfSense seja a tap0 no modo bridge
-<img width="766" height="118" alt="image" src="https://github.com/user-attachments/assets/7bed4431-7336-4f71-9c0c-b453cc7178b2" />
-
  
 
- <img width="950" height="375" alt="pfsense_bridge2" src="https://github.com/user-attachments/assets/2488ce95-7a8d-4d64-a0d5-8d959970561a" />
-
-### 2.4. No mesmo menu de redes garanta que a interface 1 esteja na sua interface da placa de rede
+ 
+### 2.3. No menu de redes garanta que a interface 1 esteja na sua interface da placa de rede
  <img width="1014" height="577" alt="image" src="https://github.com/user-attachments/assets/27d6f3b7-1e04-49fd-ad61-519f0a52cb7c" />
 
 
-### 2.5. Inicie a VM do pfsense, e ao segunda opção, então 1 e responda sim para todas as perguntas
-<img width="512" height="444" alt="image" src="https://github.com/user-attachments/assets/87b06d0f-efbd-41fb-8936-90b3e480c7cb" />
-
-### 2.6 Como resultado a wan tera um endereço ip que pode ser acessado no seu navegador, uma vez lá navegue até a interface LAN
+### 2.4 Entra na VM do pfsense e acesse o endereço wan no seu navegador
 <img width="720" height="462" alt="image" src="https://github.com/user-attachments/assets/f769314e-1346-40a3-be21-4c62cd4d62c2" />
-
-<img width="1017" height="626" alt="image" src="https://github.com/user-attachments/assets/9fb26554-1baf-47be-9d56-60eb0d2e1420" />
+ 
 O usuário é admin e a senha pfsense
-Gerar a chave de API
 
-1. Vá em **System → REST API → Keys**.
-2. Clique em **Add** e selecione o tipo **SHA256** com tamanho **32** (utilize 16 ou 32 — 36 não é um tamanho válido).
-3. Copie a chave gerada e insira no campo `PFSENSE_API_KEY` do arquivo `backend/.env`.
-
-
-### 2.7. Atribua um ip estatico ipv4 para a LAN
-
-
-<img width="1017" height="211" alt="image" src="https://github.com/user-attachments/assets/ce3f9d21-787a-4581-9c8e-1fb93439b43c" />
-
-<img width="935" height="228" alt="image" src="https://github.com/user-attachments/assets/67877420-ddff-4504-9829-3eeedc7b9e3e" />
-O ip escolhido é um exemplo 
-
-### 2.8. Ative o servidor dhcp da LAN
-<img width="999" height="640" alt="image" src="https://github.com/user-attachments/assets/b4e9dd3f-3bc2-4c0e-8c52-32bbd0e03396" />
-
-<img width="999" height="640" alt="image" src="https://github.com/user-attachments/assets/44494820-1bb8-45b9-8cda-3fcafca70c95" />
-
-<img width="940" height="276" alt="image" src="https://github.com/user-attachments/assets/2c128d34-e6e2-4162-ab50-f21ea5e7af85" />
-
+ 
  ## 📊 Passo 3: Instanciar a rede docker
 
  ### 3.1 faça o deploy da rede
@@ -262,11 +233,10 @@ uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 ### 1.2 Faça o login via conta google com o super usuário registrado no env
 <img width="1021" height="738" alt="image" src="https://github.com/user-attachments/assets/8574ccfc-81e0-4e09-82ca-a10a2a972fb8" />
 
-### 1.3 Va até a aba de administrador e cadastre sua rede: 
-<img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/fcbab1bd-a8af-4cd1-8ce7-0a9fb9edd90b" />
+ 
 os campos do zeek e suricata são os mesmo com o url sendo: http://host.docker.internal:8001 e chave: a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
  
-### 1.4 Faça login com uma conta diferente e selecione a instituição que você cadastrou 
+### 1.4 Faça login com uma conta diferente e selecione a instituição de exemplo 
 <img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/c1e40bf4-d0fd-4e72-972e-04adbfb74dcb" />
 
 ### 1.5 Volte para o user usuário e torne este usuário um administrador
