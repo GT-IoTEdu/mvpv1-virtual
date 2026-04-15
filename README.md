@@ -175,7 +175,9 @@ pip  install  -r  requirements.txt
 Para instalar o virtualbox acesse https://www.virtualbox.org/wiki/Downloads e escolha o seu OS.
 
 ### 2.2. Instale a imagem do pfsense
-Este arquivo detalha os passos de instalação do pfsense e alternativamente uma imagem pronta para o virtualbox [Instalacao_PFSense.pdf](https://github.com/user-attachments/files/26728713/Instalacao_PFSense.pdf)
+Este arquivo detalha os passos de instalação do pfsense e alternativamente uma imagem pronta para o virtualbox [Instalacao_PFSense.pdf](https://github.com/user-attachments/files/26728713/Instalacao_PFSense.pdf) 
+[imagem pronta](https://drive.google.com/file/d/1Q9IO_MZtKf6JvTIgJVl-p2nDt5d_ohEj/view?usp=sharing)  
+Caso selecione a imagem pronta siga apenas o passo 2.4 e 2.6.
 
 ### 2.3. Trocar no Virtualbox para que a interface 2 do pfSense seja a tap0 no modo bridge
 <img width="766" height="118" alt="image" src="https://github.com/user-attachments/assets/7bed4431-7336-4f71-9c0c-b453cc7178b2" />
@@ -190,7 +192,8 @@ Este arquivo detalha os passos de instalação do pfsense e alternativamente uma
 
 ### 2.5. Na máquina do pfsense selecione a segunda opção, então 1 e responda sim para todas as perguntas
 <img width="512" height="444" alt="image" src="https://github.com/user-attachments/assets/87b06d0f-efbd-41fb-8936-90b3e480c7cb" />
-Como resultado a wan tera um endereço ip que pode ser acessado no seu navegador, uma vez lá navegue até a interface LAN
+
+### 2.6 Como resultado a wan tera um endereço ip que pode ser acessado no seu navegador, uma vez lá navegue até a interface LAN
 
 <img width="1017" height="626" alt="image" src="https://github.com/user-attachments/assets/9fb26554-1baf-47be-9d56-60eb0d2e1420" />
 Gerar a chave de API
@@ -200,7 +203,7 @@ Gerar a chave de API
 3. Copie a chave gerada e insira no campo `PFSENSE_API_KEY` do arquivo `backend/.env`.
 
 
-### 2.6. Atribua um ip estatico ipv4 para a LAN
+### 2.7. Atribua um ip estatico ipv4 para a LAN
 
 
 <img width="1017" height="211" alt="image" src="https://github.com/user-attachments/assets/ce3f9d21-787a-4581-9c8e-1fb93439b43c" />
@@ -208,7 +211,7 @@ Gerar a chave de API
 <img width="935" height="228" alt="image" src="https://github.com/user-attachments/assets/67877420-ddff-4504-9829-3eeedc7b9e3e" />
 O ip escolhido é um exemplo 
 
-### 2.7. Ative o servidor dhcp da LAN
+### 2.8. Ative o servidor dhcp da LAN
 <img width="999" height="640" alt="image" src="https://github.com/user-attachments/assets/b4e9dd3f-3bc2-4c0e-8c52-32bbd0e03396" />
 
 <img width="999" height="640" alt="image" src="https://github.com/user-attachments/assets/44494820-1bb8-45b9-8cda-3fcafca70c95" />
@@ -260,7 +263,7 @@ deploy_atacante-alvo.sh
 
 ### 1.9 Monitore a aba de dispositivos bloqueados e incidentes de segurança
 
-### 2.0 Quando o dispositivo estiver bloqueado, para verificar as conexões 
+### 1.9.9 Quando o dispositivo estiver bloqueado, para verificar as conexões 
  Para conexões externas da rede
  ```bash
 docker exec -it atacante ping 8.8.8.8
