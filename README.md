@@ -237,3 +237,9 @@ deploy_atacante-alvo.sh
 ```
 
 ### 1.9 Monitore a aba de dispositivos bloqueados e incidentes de segurança
+
+## Licença
+
+Copyright (c) 2025 RNP – National Research and Education Network (Brazil)
+
+This code was developed is licensed under the terms of the BSD License. It may be freely used, modified, and distributed, including for commercial purposes, provided that this copyright notice is retained. This software is provided "as is", without any warranty, express or implied, including, but not limited to, warranties of merchantability or fitness for a particular purpose. RNP and the authors shall not be held liable for any damages or losses arising from the use of this software.
