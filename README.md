@@ -221,6 +221,7 @@ O usuário é admin e a senha pfsense
 ```
 ### 3.2 abra outro terminal e execute 
  ```bash
+sudo chown -R $USER:$USER logs_snort/*
 cd ids-log-monitor/
 uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 
