@@ -61,3 +61,13 @@ services:
     command: ["bridge-tap"]
     restart: unless-stopped
 
+  snort_ids:
+    build: ./snort
+    container_name: snort_ids
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./sites/rules_snort:/opt/snort3/etc/snort/rules
+      - ./logs_snort:/opt/snort3/logs
+    command: ["bridge-tap", "-m", "0022"]
+    restart: unless-stopped
