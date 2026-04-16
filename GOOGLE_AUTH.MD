@@ -43,7 +43,7 @@ Acesse [console.cloud.google.com](https://console.cloud.google.com) e faça logi
   ```
 - Em **"URIs de redirecionamento autorizados"**, adicione:
   ```
-  http://localhost:8000/auth/google/callback
+  http://localhost:8000/api/auth/google/callback
   ```
 - Clique em **"Criar"**.
 
