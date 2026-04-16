@@ -1,7 +1,7 @@
 # Configurações do banco de dados MySQL
 MYSQL_USER=IoT_EDU
-MYSQL_PASSWORD=sua_senha_mysql_aqui
-MYSQL_HOST=localhost
+MYSQL_PASSWORD=root
+MYSQL_HOST=db
 MYSQL_DB=iot_edu
 
 # Configurações de autenticação CAFe (OAuth2/OpenID Connect)

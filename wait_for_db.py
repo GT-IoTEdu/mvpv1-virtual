@@ -15,7 +15,7 @@ def wait_for_db():
                 database=os.getenv('MYSQL_DB', 'iot_edu'),
                 user=os.getenv('MYSQL_USER', 'IoT_EDU'),
                 password=os.getenv('MYSQL_PASSWORD', 'sua_senha_mysql_aqui'),
-                port=3307
+                port=3306
             )
             print("✅ MySQL Database is ready!")
             connection.close()

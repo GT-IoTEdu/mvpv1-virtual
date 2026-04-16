@@ -6,9 +6,9 @@ sudo ip link set tap0 master bridge-tap
 sudo ip link set tap0 up
 
 
-docker build ./target-server  -t servidor_alvo:latest
+docker build ./target-server  -t servidor_alvo:latest --no-cache
 
 
 
 
-docker build ./teste_ataque -t atacante:latest
+docker build ./teste_ataque -t atacante:latest --no-cache

@@ -35,7 +35,8 @@ docker compose down
 
 echo "Opening terminal for uvicorn server..."
 
-docker compose up --build
+docker compose --build --no-cache
+docker compose up
 
 
 
