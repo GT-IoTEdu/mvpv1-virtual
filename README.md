@@ -193,7 +193,7 @@ Este arquivo detalha os passos de instalação do pfsense e alternativamente uma
  
 
 
-IMAGEM PRONTA:[imagem pronta](https://drive.google.com/file/d/1Q9IO_MZtKf6JvTIgJVl-p2nDt5d_ohEj/view?usp=sharing)  
+IMAGEM PRONTA:[imagem pronta](https://zenodo.org/records/19608142)
 
 
  
