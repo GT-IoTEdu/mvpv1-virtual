@@ -217,6 +217,8 @@ Atualize o IP do **pfSense** para o endereço da sua Web UI:
 <img width="943" height="652" alt="image" src="https://github.com/user-attachments/assets/5ced41ed-f8da-4df9-a615-738b567882ce" />
 
 Para utilizar outras IDS, copie os campos do url e da chave do Zeek e os cole nos campos do Suricata e o Snort:
+<img width="936" height="439" alt="image" src="https://github.com/user-attachments/assets/c936f418-dba4-4669-ad1c-e2602857dfa8" />
+
 <img width="935" height="422" alt="image" src="https://github.com/user-attachments/assets/a0d01203-ee91-4091-9427-4e089a5fedc4" />
 
 > **Dica:** os campos do Zeek e do Suricata são os mesmos. Exemplo:
