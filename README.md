@@ -154,7 +154,7 @@ python -m pip install -r requirements.txt
 
 ## 📊 Passo 2: Configurar o pfSense
 
-### Atenção: conforme informado nas dependências é necessario o uso do docker para ser possivel completar a instalação, os proximos passos requerem o uso de docker. Pode ser instalado através do link https://docs.docker.com/engine/install/ubuntu/
+**Atenção**: conforme informado nas dependências é necessario o uso do docker para ser possivel completar a instalação, os proximos passos requerem o uso de docker. Pode ser instalado através do link https://docs.docker.com/engine/install/ubuntu/
 
 ```bash
 # Esse script cria uma interface virtual tap0 que será usada na configuração do pfSense
@@ -210,13 +210,13 @@ uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 ### 1.2 Faça login com o superusuário (Google OAuth)
 <img width="1021" height="738" alt="image" src="https://github.com/user-attachments/assets/8574ccfc-81e0-4e09-82ca-a10a2a972fb8" />
 
-Vá até a aba **Instituições**:
+Ainda como superusuário vá até a aba **Instituições**:
 <img width="943" height="652" alt="image" src="https://github.com/user-attachments/assets/ffe2ada5-a4cc-4728-bcc2-58a6aef0476f" />
 
-Atualize o IP do pfSense para o endereço da sua Web UI:
+Atualize o IP do **pfSense** para o endereço da sua Web UI:
 <img width="943" height="652" alt="image" src="https://github.com/user-attachments/assets/5ced41ed-f8da-4df9-a615-738b567882ce" />
 
-Para utilizar outras IDS, copie os campos do Zeek para o Suricata e o Snort:
+Para utilizar outras IDS, copie os campos do url e da chave do Zeek e os cole nos campos do Suricata e o Snort:
 <img width="935" height="422" alt="image" src="https://github.com/user-attachments/assets/a0d01203-ee91-4091-9427-4e089a5fedc4" />
 
 > **Dica:** os campos do Zeek e do Suricata são os mesmos. Exemplo:
