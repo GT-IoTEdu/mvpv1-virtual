@@ -153,6 +153,8 @@ python -m pip install -r requirements.txt
 
 ## 📊 Passo 2: Configurar o pfSense
 
+*Atenção* conforme informado nas dependências é necessario o uso do docker para ser possivel completar a instalação, os proximos passos requerem o uso de docker. Pode ser instalado através do link https://docs.docker.com/engine/install/ubuntu/
+
 ```bash
 # Esse script cria uma interface virtual tap0 que será usada na configuração do pfSense
 ./configurar_rede.sh
