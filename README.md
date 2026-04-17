@@ -1,18 +1,27 @@
- 
+
+# Sistema de Registro IoT com pfSense
+
+## Objetivo
+Este repositório tem como objetivo armazenar todo o código produzido, exemplificar o funcionamento prático do sistema de orquestração multi-IDS para ambientes IoT, e documentar os procedimentos de instalação, execução e reivindicações do artigo.
+
+## Resumo  
+Ambientes IoT ampliam a superfície de ataque e dificultam a resposta a incidentes. O IoT-Edu orquestra múltiplos IDSs (Suricata, Snort, Zeek) em um pipeline unificado com correlação de eventos e bloqueio automatizado. Em cinco tipos de ataque (75 execuções), o sistema alcança contenção média de 5,56 s, com a latência dominada pela fase de detecção. Os resultados expõem um compromisso entre a velocidade dos métodos baseados em assinaturas e o contexto dos baseados em comportamento, demonstrando que a orquestração multi-IDS melhora a resposta automatizada em ambientes IoT dinâmicos.
+
+---
 
 # Estrutura do README.md
 
 Este README.md está organizado nas seguintes seções:
 
- 
-1. **Estrutura do README.md:** A presente estrutura.
-2. **Informações básicas:** Descrição dos componentes e requisitos mínimos para a execução do experimento.
-3. **Dependências:** Informação sobre as dependências necessárias.
-4. **Preocupações com segurança:** Lista das considerações e preocupações com a segurança.
-5. **Instalação:** Instruções para instalação e configuração do sistema.
-6. **Teste mínimo:** Instruções para a execução de um teste mínimo.
-7. **Experimentos:** Informações de replicação das reivindicações.
-8. **Licença:** Informações sobre a licença do projeto.
+1. **Título, Objetivo e Resumo:** Título do projeto, objetivo do artefato e resumo. 
+2. **Estrutura do README.md:** A presente estrutura.
+3. **Informações básicas:** Descrição dos componentes e requisitos mínimos para a execução do experimento.
+4. **Dependências:** Informação sobre as dependências necessárias.
+5. **Preocupações com segurança:** Lista das considerações e preocupações com a segurança.
+6. **Instalação:** Instruções para instalação e configuração do sistema.
+7. **Teste mínimo:** Instruções para a execução de um teste mínimo.
+8. **Experimentos:** Informações de replicação das reivindicações.
+9. **Licença:** Informações sobre a licença do projeto.
 
 
 
