@@ -29,14 +29,14 @@ open_terminal() {
 cp backend/.env frontend/
 
 # Stop existing containers
-docker compose down
+docker-compose down
 
 
 
 echo "Opening terminal for uvicorn server..."
 
-docker compose --build --no-cache
-docker compose up
+docker-compose --build --no-cache
+docker-compose up
 
 
 
