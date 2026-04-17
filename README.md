@@ -235,7 +235,7 @@ a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
 ### 1.5 Volte para o superusuário e torne este usuário um administrador
 <img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/317800e7-b3c9-4681-a288-5d18bf3bb75d" />
 
-### 1.6 Como administrador, sincronize as regras e o mapeamento
+### 1.6 Faça login como administrador, sincronize as regras e o mapeamento
 <img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/ac7691a8-8a59-45ac-b09b-e5388e4dc75b" />
 <img width="1021" height="691" alt="image" src="https://github.com/user-attachments/assets/2d252067-64cd-421f-a7f4-56c7d3e42102" />
 
