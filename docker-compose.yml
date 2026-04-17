@@ -35,8 +35,8 @@ services:
 
 
 
-  zeek-monitor:
-    build: ./zeek-docker
+  zeek:
+    build: ./ids/Implementações/zeek
     network_mode: host
     privileged: true
     environment:
@@ -45,29 +45,29 @@ services:
       - NET_RAW
       - NET_ADMIN
     volumes:
-      - ./logs_zeek/:/usr/local/zeek/spool/zeek
-      - ./sites/site_zeek:/usr/local/zeek/share/zeek/site
+      - ./ids/logs/logs_zeek/:/usr/local/zeek/spool/zeek
+      - ./ids/regras/site_zeek:/usr/local/zeek/share/zeek/site
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
 
   suricata_ids:
-    build: ./suricata
+    build: ./ids/Implementações/suricata
     container_name: suricata_ids
     privileged: true
     network_mode: host
     volumes:
-      - ./sites/rules_suricata:/var/lib/suricata/rules
-      - ./logs_suricata:/var/log/suricata
+      - ./ids/regras/rules_suricata:/var/lib/suricata/rules
+      - ./ids/logs/logs_suricata:/var/log/suricata
     command: ["bridge-tap"]
     restart: unless-stopped
 
   snort_ids:
-    build: ./snort
+    build: ./ids/Implementações/snort
     container_name: snort_ids
     privileged: true
     network_mode: host
     volumes:
-      - ./sites/rules_snort:/opt/snort3/etc/snort/rules
-      - ./logs_snort:/opt/snort3/logs
+      - ./ids/regras/rules_snort:/opt/snort3/etc/snort/rules
+      - ./ids/logs/logs_snort:/opt/snort3/logs
     command: ["bridge-tap", "-m", "0022"]
     restart: unless-stopped

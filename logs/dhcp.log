@@ -1,2 +1,0 @@
-{"ts":1776170392.252204,"uids":["CcNHwb4FKG1IovivLj"],"client_addr":"192.168.56.11","server_addr":"192.168.56.102","mac":"92:d0:c6:0a:29:33","host_name":"atacante","domain":"home.arpa","assigned_addr":"192.168.56.11","lease_time":7200.0,"msg_types":["REQUEST","ACK"],"duration":0.0003261566162109375}
-{"ts":1776171106.42883,"uids":["CC3H4g2V9ORExCahDa"],"client_addr":"192.168.56.10","server_addr":"192.168.56.102","mac":"92:d0:c6:0a:29:32","domain":"home.arpa","assigned_addr":"192.168.56.10","lease_time":7200.0,"msg_types":["REQUEST","ACK"],"duration":0.0005471706390380859}
