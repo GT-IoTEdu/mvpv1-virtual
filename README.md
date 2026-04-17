@@ -49,6 +49,7 @@ Os selos considerados são:
 | Node.js | 18+ |
 | npm / pnpm | qualquer versão recente |
 
+Este projeto foi testado nos seguintes OS: Ubuntu 24.02 e Cachy Os 24.12
 ### Requisitos de Hardware (referência dos autores)
 
 | Componente | Especificação |
@@ -153,7 +154,7 @@ python -m pip install -r requirements.txt
 
 ## 📊 Passo 2: Configurar o pfSense
 
-*Atenção* conforme informado nas dependências é necessario o uso do docker para ser possivel completar a instalação, os proximos passos requerem o uso de docker. Pode ser instalado através do link https://docs.docker.com/engine/install/ubuntu/
+### Atenção: conforme informado nas dependências é necessario o uso do docker para ser possivel completar a instalação, os proximos passos requerem o uso de docker. Pode ser instalado através do link https://docs.docker.com/engine/install/ubuntu/
 
 ```bash
 # Esse script cria uma interface virtual tap0 que será usada na configuração do pfSense
@@ -193,6 +194,9 @@ Credenciais padrão: usuário `admin` e senha `pfsense`.
 
 ### 3.2 Abra outro terminal e execute
 ```bash
+source venv/bin/activate
+
+
 sudo chown -R "$USER:$USER" logs_snort/
 cd ids-log-monitor/
 uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
