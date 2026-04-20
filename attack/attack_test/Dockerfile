@@ -15,4 +15,6 @@ RUN pip3 install --break-system-packages slowloris
 
 
 COPY  entrypoint.sh /entrypoint.sh
+COPY  entrypoint2.sh /entrypoint2.sh
 RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint2.sh
