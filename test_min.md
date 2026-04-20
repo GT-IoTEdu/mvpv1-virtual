@@ -43,16 +43,25 @@ a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
 92:d0:c6:0a:29:33
 
 # Exemplo de nome
-Atacante
+test
 
 #Exemplo de descrição
-Máquina Atacante
+Máquina test
 ```
 
-### 1.8 (Admin) Libere/desbloqueie o dispositivo cadastrado
+### 1.8 Faça o deploy do container de teste 
+
+```bash
+  chmod +x setup/deploy_test_min.sh 
+
+ ./setup/deploy_test_min.sh 
+
+```
+
+### 1.9 (Admin) Libere/desbloqueie o dispositivo cadastrado
 Se o dispositivo aparecer como bloqueado, inclua o filtro **Dispositivos bloqueados** e clique em **Desbloquear/Liberar** para o MAC cadastrado.
 <img width="1243" height="670" alt="image" src="https://github.com/user-attachments/assets/550a5ebd-d50c-4fad-bb26-4030c774b5eb" />
 
-## 1.9 Bloquear dispositivos manualmente
+## 2.0 Bloquear dispositivos manualmente
 Se o dispositivo aparecer como bloqueado, inclua o filtro **Dispositivos bloqueados** e clique em **Desbloquear/Liberar** para o MAC cadastrado.
 <img width="1243" height="670" alt="image" src="https://github.com/user-attachments/assets/550a5ebd-d50c-4fad-bb26-4030c774b5eb" />
