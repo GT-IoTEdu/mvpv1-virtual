@@ -40,7 +40,7 @@ a8f4c2d9-1c9b-4b6f-9d6e-aaa111bbb222
 
 ```bash
 # Exemplo de MAC estático
-92:d0:c6:0a:29:33
+92:d0:c6:0a:29:34
 
 # Exemplo de nome
 Atacante
