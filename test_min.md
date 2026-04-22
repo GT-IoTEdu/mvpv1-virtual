@@ -47,6 +47,8 @@ test
 
 #Exemplo de descrição
 Máquina test
+#ou use o gerador de mac
+mac_manager.sh generate
 ```
 
 ### 1.8 Faça o deploy do container de teste 
