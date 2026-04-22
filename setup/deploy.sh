@@ -22,7 +22,7 @@ docker-compose down
 
 echo "Opening terminal for uvicorn server..."
 
-docker-compose build --no-cache
+docker-compose build 
 docker-compose up
 
 

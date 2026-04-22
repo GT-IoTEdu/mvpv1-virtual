@@ -4,13 +4,10 @@ echo "[+] Starting HTTP DoS/DDoS Attack Simulation"
 
 # Usar variável de ambiente SERVER_IP, com fallback para valor padrão
 TARGET_IP="${SERVER_IP:-192.168.56.111}"
-echo "[+] Target: http://${TARGET_IP}"
+echo "[+] Target DDOS: http://${TARGET_IP}"
 echo ""
 
-ip link set lo up
-ip link set veth-cont-02 name eth0
-ip link set eth0 up
-dhclient -v eth0
+
 
 # Extrai apenas o IP/hostname sem http://
 TARGET_HOST=$(echo "${TARGET_IP}" | sed 's/http:\/\///' | sed 's/https:\/\///' | cut -d'/' -f1)
