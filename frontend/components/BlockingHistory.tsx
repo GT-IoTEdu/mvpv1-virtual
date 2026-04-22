@@ -65,7 +65,7 @@ const BlockingHistory: React.FC<BlockingHistoryProps> = ({
   const pageItems = blockings.slice(start, start + perPage);
 
   const getApiBase = () =>
-    process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+    process.env.NEXT_PUBLIC_API_BASE || "/api";
 
   const fetchDeviceData = async (dhcpMappingId: number): Promise<BlockingItem["device"] | null> => {
     try {
@@ -140,7 +140,7 @@ const BlockingHistory: React.FC<BlockingHistoryProps> = ({
       }
       const message =
         err instanceof TypeError && err.message === "Failed to fetch"
-          ? "Não foi possível contactar a API. Verifique se o backend está em execução e se NEXT_PUBLIC_API_BASE está correto (ex: http://127.0.0.1:8000)."
+          ? "Não foi possível contactar a API. Verifique se o backend está em execução e se NEXT_PUBLIC_API_BASE está correto (ex: /api ou https://api.seu-dominio.com)."
           : err instanceof Error && err.message === "Timeout"
             ? "Tempo esgotado ao contactar a API. Tente novamente."
             : "Erro de conexão ao carregar histórico.";

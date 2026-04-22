@@ -47,7 +47,7 @@ const FeedbackStats: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const base = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const base = process.env.NEXT_PUBLIC_API_BASE || "/api";
       
       // Buscar estatísticas e feedbacks recentes em paralelo
       const [statsResponse, recentResponse] = await Promise.all([

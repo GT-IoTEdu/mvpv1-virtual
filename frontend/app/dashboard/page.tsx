@@ -421,7 +421,7 @@ export default function DashboardPage() {
         return;
       }
       
-      const base = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       const response = await apiFetch(`${base}/api/devices/dhcp/status?current_user_id=${userId}`);
       
       if (!response.ok) {
@@ -595,7 +595,7 @@ export default function DashboardPage() {
     setDeviceIpsLoading(true);
     setDeviceIpsError(null);
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       const response = await apiFetch(`${base}/api/devices/devices/ips`);
       
       if (response.ok) {
@@ -619,7 +619,7 @@ export default function DashboardPage() {
     if (incidents.length === 0) return;
 
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       let savedCount = 0;
 
       // Processa cada incidente notice
@@ -929,7 +929,7 @@ export default function DashboardPage() {
     setNoticeLoading(true);
     setNoticeError(null);
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       console.log('🌐 Base URL configurada para notice:', base);
       
       // Primeiro tenta usar o endpoint de logs diretamente
@@ -2541,7 +2541,7 @@ export default function DashboardPage() {
             className="ml-2 px-3 py-1.5 rounded-md bg-rose-600/90 hover:bg-rose-600 text-white text-sm"
             onClick={async () => {
               try {
-                await apiFetch("http://localhost:8000/api/auth/logout", { method: "POST", credentials: "include" });
+                await apiFetch("/api/auth/logout", { method: "POST", credentials: "include" });
               } catch {}
               try {
                 window.localStorage.removeItem("auth:user");

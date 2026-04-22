@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "").trim();
+const authPath = (path: string): string => (API_BASE ? `${API_BASE}${path}` : path);
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -25,15 +28,18 @@ export default function LoginPage() {
 
       // Verifica se o backend está acessível antes de abrir o popup
       try {
-        const response = await fetch("http://localhost:8000/api/auth/health", {
+        const response = await fetch(authPath("/api/auth/health"), {
           method: "HEAD",
-          mode: "no-cors",
+          credentials: "include",
         });
-        console.log("Backend está acessível");
+        if (!response.ok) {
+          throw new Error(`Health check falhou com status ${response.status}`);
+        }
+        console.log("Backend está acessível:", authPath("/api/auth/health"));
       } catch (err) {
         console.error("Erro ao verificar backend:", err);
         alert(
-          "Servidor backend não está acessível. Verifique se está rodando em http://localhost:8000"
+          "Servidor backend não está acessível. Verifique a configuração de API do ambiente."
         );
         setIsLoading(false);
         return;
@@ -41,7 +47,7 @@ export default function LoginPage() {
 
       // Abre uma nova janela para o fluxo OAuth
       const popup = window.open(
-        "http://localhost:8000/api/auth/google/login",
+        authPath("/api/auth/google/login"),
         "googleLogin",
         "width=500,height=600"
       );
@@ -261,7 +267,7 @@ export default function LoginPage() {
                     onClick={() => {
                       try {
                         const p = window.open(
-                          "http://localhost:8000/api/auth/google/login",
+                          authPath("/api/auth/google/login"),
                           "googleLogin",
                           "width=500,height=600"
                         );

@@ -22,7 +22,8 @@ SECRET_KEY = config("SECRET_KEY", cast=str, default="supersecret")
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Para testes locais
 
-REDIRECT_URI = "http://localhost:8000/api/auth/google/callback"
+#REDIRECT_URI = "http://localhost:8000/api/auth/google/callback"
+REDIRECT_URI = "https://mvp.iotedu.org/api/auth/google/callback"
 
 def get_flow():
     return Flow.from_client_config(

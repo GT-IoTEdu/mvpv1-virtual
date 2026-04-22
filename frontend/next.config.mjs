@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const apiInternalBase = (process.env.API_INTERNAL_URL || "http://localhost:8000").replace(/\/$/, "");
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -13,7 +15,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL + '/api/:path*',
+        destination: `${apiInternalBase}/api/:path*`,
       },
     ];
   },
