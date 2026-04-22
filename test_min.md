@@ -56,7 +56,7 @@ mac_manager.sh generate
 ```bash
   chmod +x setup/deploy_test_min.sh 
 
- ./setup/deploy_test_min.sh 
+ ./setup/deploy_test_min.sh endereço MAC Utilizado
 
 ```
 
