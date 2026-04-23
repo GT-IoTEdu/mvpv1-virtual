@@ -5,7 +5,7 @@ docker rm -f test_min
 docker run -d --name test_min --hostname test_min \
     --network none \
     --cap-add NET_ADMIN --cap-add NET_RAW \
-ddos:latest sleep infinity
+atacante:latest sleep infinity
 
 
 sudo ip link add veth-host-04 type veth peer name veth-cont-04
