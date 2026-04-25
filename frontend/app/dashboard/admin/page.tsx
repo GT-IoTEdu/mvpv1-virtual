@@ -167,8 +167,8 @@ export default function AdminDashboardPage() {
       localStorage.removeItem("admin_info");
     } catch {}
 
-    if (provider === "iotedu") {
-      window.location.href = "/api/auth/iotedu/logout";
+    if (provider === "iotedu" || provider === "anonshield") {
+      window.location.href = `/api/auth/${provider}/logout`;
       return;
     }
 

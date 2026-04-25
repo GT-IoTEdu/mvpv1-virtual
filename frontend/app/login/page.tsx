@@ -16,7 +16,7 @@ export default function LoginPage() {
   const router = useRouter();
   // Novo estado para controlar se o login CAFe está habilitado
   const [cafeEnabled, setCafeEnabled] = useState(false);
-  const [isIdpLoading, setIsIdpLoading] = useState(false);
+  const [idpLoadingProvider, setIdpLoadingProvider] = useState<string | null>(null);
   const popupRef = useRef<Window | null>(null);
   const gotMessageRef = useRef(false);
   const pollTimerRef = useRef<number | null>(null);
@@ -141,8 +141,8 @@ export default function LoginPage() {
     }
   }
 
-  async function handleIdpLogin() {
-    setIsIdpLoading(true);
+  async function handleIdpLogin(provider: "iotedu" | "anonshield") {
+    setIdpLoadingProvider(provider);
     try {
       try {
         const response = await fetch(authPath("/api/auth/health"), {
@@ -155,32 +155,33 @@ export default function LoginPage() {
       } catch (err) {
         console.error("Erro ao verificar backend:", err);
         alert("Servidor backend não está acessível.");
-        setIsIdpLoading(false);
+        setIdpLoadingProvider(null);
         return;
       }
 
       const popup = window.open(
-        authPath("/api/auth/iotedu/login"),
-        "iotEduIdpLogin",
+        authPath(`/api/auth/${provider}/login`),
+        `${provider}IdpLogin`,
         "width=500,height=700"
       );
       if (!popup) {
-        alert("Permita popups para este site para fazer login com o IDP interno");
-        setIsIdpLoading(false);
+        alert("Permita popups para este site para fazer login");
+        setIdpLoadingProvider(null);
         return;
       }
       idpPopupRef.current = popup;
+      idpGotMessageRef.current = false;
 
       const onMessage = (event: MessageEvent) => {
-        if (event.data?.provider !== "iotedu") return;
+        if (event.data?.provider !== provider) return;
         idpGotMessageRef.current = true;
-        setIsIdpLoading(false);
+        setIdpLoadingProvider(null);
         window.removeEventListener("message", onMessage);
         try {
           window.localStorage.setItem(
             "auth:user",
             JSON.stringify({
-              provider: "iotedu",
+              provider,
               name: event.data.name || "",
               email: event.data.email || "",
               picture: event.data.picture || "",
@@ -201,7 +202,7 @@ export default function LoginPage() {
           window.clearInterval(idpPollTimerRef.current!);
           idpPollTimerRef.current = null;
           if (!idpGotMessageRef.current) {
-            setIsIdpLoading(false);
+            setIdpLoadingProvider(null);
             window.removeEventListener("message", onMessage);
           }
         }
@@ -211,13 +212,13 @@ export default function LoginPage() {
       idpTimeoutRef.current = window.setTimeout(() => {
         if (!idpGotMessageRef.current) {
           try { idpPopupRef.current?.close(); } catch {}
-          setIsIdpLoading(false);
+          setIdpLoadingProvider(null);
           window.removeEventListener("message", onMessage);
           alert("Não foi possível completar o login. Tente novamente.");
         }
       }, 60000);
     } catch (err) {
-      setIsIdpLoading(false);
+      setIdpLoadingProvider(null);
       console.error("Erro ao iniciar login IDP:", err);
       alert(err instanceof Error ? `Erro: ${err.message}` : "Erro ao iniciar login.");
     }
@@ -397,18 +398,33 @@ export default function LoginPage() {
             )}
           </Card>
 
-          {/* IDP Interno (Keycloak) */}
+          {/* IdP IoTEdu (idp.iotedu.org) */}
           <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
             <h2 className="text-xl font-semibold text-white mb-4">
-              Login com IDP Interno
+              IdP IoTEdu
             </h2>
             <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center"
-              onClick={handleIdpLogin}
-              disabled={isIdpLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+              onClick={() => handleIdpLogin("iotedu")}
+              disabled={idpLoadingProvider !== null}
             >
-              {!isIdpLoading && <KeyRound className="w-5 h-5 mr-2" />}
-              {isIdpLoading ? "Conectando..." : "Entrar com IDP interno"}
+              {idpLoadingProvider !== "iotedu" && <KeyRound aria-hidden="true" className="w-5 h-5 mr-2" />}
+              {idpLoadingProvider === "iotedu" ? "Conectando..." : "Entrar com IdP IoTEdu"}
+            </Button>
+          </Card>
+
+          {/* IdP AnonShield (idp.anonshield.org) */}
+          <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              IdP AnonShield
+            </h2>
+            <Button
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center"
+              onClick={() => handleIdpLogin("anonshield")}
+              disabled={idpLoadingProvider !== null}
+            >
+              {idpLoadingProvider !== "anonshield" && <KeyRound aria-hidden="true" className="w-5 h-5 mr-2" />}
+              {idpLoadingProvider === "anonshield" ? "Conectando..." : "Entrar com IdP AnonShield"}
             </Button>
           </Card>
         </div>

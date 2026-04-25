@@ -2546,8 +2546,8 @@ export default function DashboardPage() {
                 provider = stored.provider || "google";
               } catch {}
               try { window.localStorage.removeItem("auth:user"); } catch {}
-              if (provider === "iotedu") {
-                window.location.href = "/api/auth/iotedu/logout";
+              if (provider === "iotedu" || provider === "anonshield") {
+                window.location.href = `/api/auth/${provider}/logout`;
                 return;
               }
               try {

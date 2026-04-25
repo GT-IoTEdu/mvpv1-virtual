@@ -56,7 +56,7 @@ app.include_router(snort_router, prefix="/api", tags=["Snort IDS/IPS"])
 app.include_router(test_metrics_router, tags=["Teste - Métricas"])
 app.include_router(cafe_auth_router, prefix="/api/auth/cafe", tags=["Autenticação CAFe"])
 app.include_router(google_auth_router, prefix="/api/auth", tags=["Autenticação Google OAuth2"])
-app.include_router(iotedu_auth_router, prefix="/api/auth/iotedu", tags=["Autenticação OIDC Keycloak"])
+app.include_router(iotedu_auth_router, prefix="/api/auth", tags=["Autenticação OIDC (multi-IdP)"])
 app.include_router(saml_router, tags=["Autenticação SAML CAFe"])
 app.include_router(admin_router, prefix="/api", tags=["Autenticação Administrativa"])
 
