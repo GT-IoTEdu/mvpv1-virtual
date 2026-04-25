@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
       gotMessageRef.current = false;
 
       // Listener para receber mensagem do popup
-      const onMessage = function onMessage(event: MessageEvent) {
+      const onMessage = async function onMessage(event: MessageEvent) {
         console.log("Mensagem recebida:", event.data);
         console.log("Origem da mensagem:", event.origin);
 
