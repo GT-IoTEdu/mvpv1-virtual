@@ -54,7 +54,7 @@ const FeedbackHistory: React.FC<FeedbackHistoryProps> = ({
       setLoading(true);
       setError(null);
       
-      const base = process.env.NEXT_PUBLIC_API_BASE || "/api";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       
       const response = await fetch(`${base}/api/feedback/dhcp/${dhcpMappingId}?limit=20`, {
         credentials: "include",

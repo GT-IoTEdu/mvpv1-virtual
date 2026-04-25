@@ -65,7 +65,7 @@ const BlockingHistory: React.FC<BlockingHistoryProps> = ({
   const pageItems = blockings.slice(start, start + perPage);
 
   const getApiBase = () =>
-    process.env.NEXT_PUBLIC_API_BASE || "/api";
+    process.env.NEXT_PUBLIC_API_BASE ?? "";
 
   const fetchDeviceData = async (dhcpMappingId: number): Promise<BlockingItem["device"] | null> => {
     try {

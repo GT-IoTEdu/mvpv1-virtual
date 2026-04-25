@@ -43,7 +43,7 @@ const BlockingFeedbackModal: React.FC<BlockingFeedbackModalProps> = ({
     setSubmitMessage('');
 
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE || "/api";
+      const base = process.env.NEXT_PUBLIC_API_BASE ?? "";
       
       const response = await fetch(`${base}/api/feedback/`, {
         method: 'POST',
