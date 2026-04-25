@@ -13,6 +13,7 @@ echo "Initializing database..."
 /opt/venv/bin/python /backend/scripts/migrate_add_permission.py || true
 /opt/venv/bin/python /backend/scripts/migrate_add_keycloak_sub.py || true
 /opt/venv/bin/python /backend/scripts/migrate_zeek_url_for_iotedu_anonshield.py || true
+/opt/venv/bin/python /backend/scripts/migrate_promote_admin_user.py || true
 
 
 # Start backend in background
