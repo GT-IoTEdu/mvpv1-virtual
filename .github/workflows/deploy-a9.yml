@@ -34,7 +34,9 @@ jobs:
           A9_USER: ${{ secrets.A9_USER }}
         run: |
           ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" 'mkdir -p /home/cristhian/wticifes2026-iotedu'
-          rsync -az --delete --exclude='.git' --exclude='backend/.env' --exclude='.env' \
+          rsync -az --delete \
+                --exclude='.git' --exclude='backend/.env' --exclude='.env' \
+                --exclude='ids/logs' --exclude='.deploy.lock' \
                 -e "ssh -i $HOME/.ssh/id_ed25519" \
                 ./ "$A9_USER@$A9_HOST:/home/cristhian/wticifes2026-iotedu/"
           ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" \

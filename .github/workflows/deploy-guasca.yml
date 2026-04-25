@@ -34,7 +34,9 @@ jobs:
           GUASCA_USER: ${{ secrets.GUASCA_USER }}
         run: |
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" 'mkdir -p /home/cristhian/mvpv1-virtual'
-          rsync -az --delete --exclude='.git' --exclude='backend/.env' \
+          rsync -az --delete \
+                --exclude='.git' --exclude='backend/.env' --exclude='.env' \
+                --exclude='ids/logs' --exclude='.deploy.lock' \
                 -e "ssh -i $HOME/.ssh/id_ed25519" \
                 ./ "$GUASCA_USER@$GUASCA_HOST:/home/cristhian/mvpv1-virtual/"
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
