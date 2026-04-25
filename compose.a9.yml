@@ -1,0 +1,21 @@
+name: iotedu-anonshield
+
+services:
+  db:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: !reset []
+    volumes:
+      - iotedu_db_data:/var/lib/mysql
+
+  backend:
+    ports: !reset []
+
+  frontend:
+    ports: !reset []
+
+volumes:
+  iotedu_db_data:
