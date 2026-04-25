@@ -1,9 +1,8 @@
 #!/bin/bash
+set -e
 
- 
-# Start frontend in background
-echo "Starting frontend server..."
-npm run dev &
+echo "Building Next.js (production)..."
+npm run build
 
-# Wait for any process to exit
-wait -n
+echo "Starting frontend (production)..."
+exec npm run start -- -H 0.0.0.0 -p 3000
