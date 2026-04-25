@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Wifi, ArrowLeft } from "lucide-react";
+import { Wifi, ArrowLeft, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
@@ -16,10 +16,15 @@ export default function LoginPage() {
   const router = useRouter();
   // Novo estado para controlar se o login CAFe está habilitado
   const [cafeEnabled, setCafeEnabled] = useState(false);
+  const [isIdpLoading, setIsIdpLoading] = useState(false);
   const popupRef = useRef<Window | null>(null);
   const gotMessageRef = useRef(false);
   const pollTimerRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const idpPopupRef = useRef<Window | null>(null);
+  const idpGotMessageRef = useRef(false);
+  const idpPollTimerRef = useRef<number | null>(null);
+  const idpTimeoutRef = useRef<number | null>(null);
 
   async function handleGoogleLogin() {
     setIsLoading(true);
@@ -136,6 +141,88 @@ export default function LoginPage() {
     }
   }
 
+  async function handleIdpLogin() {
+    setIsIdpLoading(true);
+    try {
+      try {
+        const response = await fetch(authPath("/api/auth/health"), {
+          method: "HEAD",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error(`Health check falhou com status ${response.status}`);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar backend:", err);
+        alert("Servidor backend não está acessível.");
+        setIsIdpLoading(false);
+        return;
+      }
+
+      const popup = window.open(
+        authPath("/api/auth/iotedu/login"),
+        "iotEduIdpLogin",
+        "width=500,height=700"
+      );
+      if (!popup) {
+        alert("Permita popups para este site para fazer login com o IDP interno");
+        setIsIdpLoading(false);
+        return;
+      }
+      idpPopupRef.current = popup;
+
+      const onMessage = (event: MessageEvent) => {
+        if (event.data?.provider !== "iotedu") return;
+        idpGotMessageRef.current = true;
+        setIsIdpLoading(false);
+        window.removeEventListener("message", onMessage);
+        try {
+          window.localStorage.setItem(
+            "auth:user",
+            JSON.stringify({
+              provider: "iotedu",
+              name: event.data.name || "",
+              email: event.data.email || "",
+              picture: event.data.picture || "",
+              user_id: event.data.user_id || null,
+              permission: event.data.permission || "USER",
+            })
+          );
+        } catch (e) {
+          console.warn("Falha ao salvar dados do usuário:", e);
+        }
+        router.push("/dashboard");
+      };
+      window.addEventListener("message", onMessage);
+
+      if (idpPollTimerRef.current) window.clearInterval(idpPollTimerRef.current);
+      idpPollTimerRef.current = window.setInterval(() => {
+        if (!idpPopupRef.current || idpPopupRef.current.closed) {
+          window.clearInterval(idpPollTimerRef.current!);
+          idpPollTimerRef.current = null;
+          if (!idpGotMessageRef.current) {
+            setIsIdpLoading(false);
+            window.removeEventListener("message", onMessage);
+          }
+        }
+      }, 500);
+
+      if (idpTimeoutRef.current) window.clearTimeout(idpTimeoutRef.current);
+      idpTimeoutRef.current = window.setTimeout(() => {
+        if (!idpGotMessageRef.current) {
+          try { idpPopupRef.current?.close(); } catch {}
+          setIsIdpLoading(false);
+          window.removeEventListener("message", onMessage);
+          alert("Não foi possível completar o login. Tente novamente.");
+        }
+      }, 60000);
+    } catch (err) {
+      setIsIdpLoading(false);
+      console.error("Erro ao iniciar login IDP:", err);
+      alert(err instanceof Error ? `Erro: ${err.message}` : "Erro ao iniciar login.");
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (pollTimerRef.current) {
@@ -145,6 +232,14 @@ export default function LoginPage() {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
+      }
+      if (idpPollTimerRef.current) {
+        window.clearInterval(idpPollTimerRef.current);
+        idpPollTimerRef.current = null;
+      }
+      if (idpTimeoutRef.current) {
+        window.clearTimeout(idpTimeoutRef.current);
+        idpTimeoutRef.current = null;
       }
     };
   }, []);
@@ -300,6 +395,21 @@ export default function LoginPage() {
                 </div>
               </div>
             )}
+          </Card>
+
+          {/* IDP Interno (Keycloak) */}
+          <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Login com IDP Interno
+            </h2>
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center"
+              onClick={handleIdpLogin}
+              disabled={isIdpLoading}
+            >
+              {!isIdpLoading && <KeyRound className="w-5 h-5 mr-2" />}
+              {isIdpLoading ? "Conectando..." : "Entrar com IDP interno"}
+            </Button>
           </Card>
         </div>
 
