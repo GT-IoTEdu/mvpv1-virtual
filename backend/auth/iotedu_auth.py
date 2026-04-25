@@ -93,9 +93,10 @@ def _provision_user(db, claims: dict, request: Request) -> User:
 
     user = db.query(User).filter(User.keycloak_sub == sub).first()
     if user is None:
+        # Mesmo email pode existir em IdPs diferentes (ex: super@iotedu.org tanto
+        # no realm iotedu quanto no realm anonshield, com `sub` distinto). Trata
+        # como o mesmo user — sobrescreve `keycloak_sub` com o do login atual.
         user = db.query(User).filter(User.email == email).first()
-        if user is not None and user.keycloak_sub and user.keycloak_sub != sub:
-            raise HTTPException(status_code=409, detail="Email já vinculado a outra identidade")
 
     admin_email = (app_config.SUPERUSER_ACCESS or "").lower()
     is_admin = bool(admin_email) and email == admin_email
@@ -119,7 +120,7 @@ def _provision_user(db, claims: dict, request: Request) -> User:
             user.nome = name
         if picture:
             user.picture = picture
-        if not user.keycloak_sub:
+        if user.keycloak_sub != sub:
             user.keycloak_sub = sub
         if is_admin and user.permission != UserPermission.SUPERUSER:
             user.permission = UserPermission.SUPERUSER
