@@ -28,6 +28,13 @@ redef ignore_checksums = T;
 # Habilita formato JSON para compatibilidade e comparação
 redef LogAscii::use_json = T;
 
+# Em hosts compartilhados (network_mode: host com outras instâncias Zeek
+# rodando), defina ZEEK_DISABLE_METRICS=1 para evitar bind-conflict na
+# porta padrão 9991 do endpoint Prometheus.
+@if ( getenv("ZEEK_DISABLE_METRICS") == "1" )
+redef Telemetry::metrics_port = 0/tcp;
+@endif
+
 # Configuração para garantir que todos os notices sejam logados
 hook Notice::policy(n: Notice::Info) &priority=10
 {
