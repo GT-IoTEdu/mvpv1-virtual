@@ -8,10 +8,21 @@ BASE_URL="${1:?usage: smoke-test.sh https://host}"
 BASE_URL="${BASE_URL%/}"
 FAIL=0
 
+# Se o host BASE_URL não resolve via DNS local (ex.: smoke rodando no
+# próprio servidor com resolver corporativo cacheando NXDOMAIN antigo),
+# forçamos via --resolve para 127.0.0.1. Caddy serve o vhost certo via
+# SNI. Não muda nada quando rodando do runner do GitHub.
+RESOLVE_ARGS=()
+host_only=$(echo "$BASE_URL" | sed -E 's#^https?://([^/:]+).*#\1#')
+if ! getent hosts "$host_only" >/dev/null 2>&1; then
+    RESOLVE_ARGS=(--resolve "${host_only}:443:127.0.0.1" --resolve "${host_only}:80:127.0.0.1")
+    echo "(aviso: $host_only não resolve via DNS local — usando --resolve 127.0.0.1)"
+fi
+
 probe() {
     local desc="$1" url="$2" want_code="$3"
     local code
-    code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || echo 000)
+    code=$(curl -sS "${RESOLVE_ARGS[@]}" -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || echo 000)
     if [ "$code" = "$want_code" ]; then
         printf '  \033[32m✓\033[0m %-40s %s -> %s\n' "$desc" "$url" "$code"
     else
