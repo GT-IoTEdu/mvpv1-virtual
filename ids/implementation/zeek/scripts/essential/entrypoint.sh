@@ -58,6 +58,12 @@ if [ ! -f /usr/local/zeek/etc/zeekctl.cfg ]; then
     exit 1
 fi
 
+# Desativa o endpoint Prometheus do Zeek (default 9991). Pode ser
+# reativado definindo ZEEK_METRICS_PORT no ambiente do container.
+METRICS_PORT="${ZEEK_METRICS_PORT:-0}"
+sed -i "s/^MetricsPort = .*/MetricsPort = ${METRICS_PORT}/" /usr/local/zeek/etc/zeekctl.cfg
+echo "[Zeek Entrypoint] zeekctl.cfg MetricsPort = ${METRICS_PORT}"
+
 echo "[Zeek Entrypoint] Criando node.cfg com interface $IFACE..."
 cat <<EOF > /usr/local/zeek/etc/node.cfg
 [zeek]
