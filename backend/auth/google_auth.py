@@ -20,10 +20,9 @@ GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET")
 SECRET_KEY = config("SECRET_KEY", cast=str, default="supersecret")
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Para testes locais
-
-REDIRECT_URI = "http://localhost:8000/api/auth/google/callback"
-#REDIRECT_URI = "https://mvp.iotedu.org/api/auth/google/callback"
+REDIRECT_URI = config("GOOGLE_REDIRECT_URI", cast=str, default="http://localhost:8000/api/auth/google/callback")
+if REDIRECT_URI.startswith("http://"):
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 def get_flow():
     return Flow.from_client_config(
