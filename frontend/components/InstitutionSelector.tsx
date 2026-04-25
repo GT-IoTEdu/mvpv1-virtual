@@ -64,8 +64,8 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
       const data = await response.json();
       setInstitutions(data.institutions || []);
     } catch (err) {
-      console.error("Erro ao buscar instituições:", err);
-      const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao carregar instituições";
+      console.error("Erro ao buscar unidades:", err);
+      const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao carregar unidades";
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -74,7 +74,7 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
 
   const handleSave = async () => {
     if (!selectedInstitutionId) {
-      setError("Por favor, selecione uma instituição");
+      setError("Por favor, selecione uma unidade");
       return;
     }
 
@@ -108,7 +108,7 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
       const data = await response.json();
       setSuccess(true);
 
-      // Atualizar localStorage com a nova instituição
+      // Atualizar localStorage com a nova unidade
       const authUserStr = localStorage.getItem("auth:user");
       if (authUserStr) {
         const authUser = JSON.parse(authUserStr);
@@ -127,8 +127,8 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
         window.location.reload();
       }, 1000);
     } catch (err) {
-      console.error("Erro ao salvar instituição:", err);
-      const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao salvar instituição";
+      console.error("Erro ao salvar unidade:", err);
+      const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao salvar unidade";
       setError(errorMsg);
     } finally {
       setSaving(false);
@@ -142,7 +142,7 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <p className="text-sm text-gray-600">Carregando instituições...</p>
+              <p className="text-sm text-gray-600">Carregando unidades...</p>
             </div>
           </CardContent>
         </Card>
@@ -156,10 +156,10 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-blue-600" />
-            Selecione sua Instituição
+            Selecione sua Unidade
           </CardTitle>
           <CardDescription>
-            Para continuar, é necessário selecionar a instituição à qual você pertence.
+            Para continuar, é necessário selecionar a unidade à qual você pertence.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -173,7 +173,7 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
             <Alert className="border-green-500 bg-green-50">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                Instituição selecionada com sucesso!
+                Unidade selecionada com sucesso!
               </AlertDescription>
             </Alert>
           )}
@@ -181,21 +181,21 @@ export default function InstitutionSelector({ onInstitutionSelected }: Instituti
           {institutions.length === 0 ? (
             <Alert>
               <AlertDescription>
-                Nenhuma instituição disponível no momento. Entre em contato com o administrador.
+                Nenhuma unidade disponível no momento. Entre em contato com o administrador.
               </AlertDescription>
             </Alert>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="institution" className="text-sm font-medium">
-                  Instituição
+                  Unidade
                 </label>
                 <Select
                   value={selectedInstitutionId?.toString() || ""}
                   onValueChange={(value) => setSelectedInstitutionId(parseInt(value))}
                 >
                   <SelectTrigger id="institution">
-                    <SelectValue placeholder="Selecione uma instituição" />
+                    <SelectValue placeholder="Selecione uma unidade" />
                   </SelectTrigger>
                   <SelectContent>
                     {institutions.map((inst) => (

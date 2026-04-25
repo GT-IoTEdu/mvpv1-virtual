@@ -74,7 +74,7 @@ export default function InstitutionEditForm({
 
   const validateForm = () => {
     if (!formData.nome.trim()) {
-      setError("Nome da instituição é obrigatório");
+      setError("Nome da unidade é obrigatório");
       return false;
     }
     if (!formData.cidade.trim()) {
@@ -153,13 +153,13 @@ export default function InstitutionEditForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro ao atualizar instituição");
+        throw new Error(errorData.detail || "Erro ao atualizar unidade");
       }
 
       const data = await response.json();
       onSave(data.institution);
     } catch (err) {
-      console.error('Erro ao atualizar instituição:', err);
+      console.error('Erro ao atualizar unidade:', err);
       setError(err instanceof Error ? err.message : "Erro inesperado");
     } finally {
       setLoading(false);
@@ -174,7 +174,7 @@ export default function InstitutionEditForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Editar Instituição</CardTitle>
+        <CardTitle>Editar Unidade</CardTitle>
         <CardDescription>
           Atualize as informações de {institution.nome} - {institution.cidade}
         </CardDescription>
@@ -189,7 +189,7 @@ export default function InstitutionEditForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="nome">Nome da Instituição</Label>
+              <Label htmlFor="nome">Nome da Unidade</Label>
               <Input
                 id="nome"
                 value={formData.nome}

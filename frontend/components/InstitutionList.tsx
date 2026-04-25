@@ -62,7 +62,7 @@ export default function InstitutionList() {
       setError(null);
       
       const url = `${API_BASE}/admin/institutions`;
-      console.log('Buscando instituições em:', url);
+      console.log('Buscando unidades em:', url);
       
       const response = await makeAuthenticatedRequest(url, {
         method: "GET",
@@ -126,7 +126,7 @@ export default function InstitutionList() {
   };
 
   const deleteInstitution = async (id: number, nome: string) => {
-    if (!confirm(`Tem certeza que deseja excluir a instituição "${nome}"? Esta ação é irreversível!`)) {
+    if (!confirm(`Tem certeza que deseja excluir a unidade "${nome}"? Esta ação é irreversível!`)) {
       return;
     }
 
@@ -143,7 +143,7 @@ export default function InstitutionList() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Delete error response:', errorData);
-        throw new Error(errorData.detail || "Erro ao excluir instituição");
+        throw new Error(errorData.detail || "Erro ao excluir unidade");
       }
 
       const data = await response.json();
@@ -187,7 +187,7 @@ export default function InstitutionList() {
       <Card>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Carregando instituições...</span>
+          <span>Carregando unidades...</span>
         </CardContent>
       </Card>
     );
@@ -199,10 +199,10 @@ export default function InstitutionList() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Instituições Cadastradas ({institutions.length})
+            Unidades Cadastradas ({institutions.length})
           </CardTitle>
           <CardDescription>
-            Gerencie as instituições cadastradas no sistema
+            Gerencie as unidades cadastradas no sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -214,7 +214,7 @@ export default function InstitutionList() {
 
           {institutions.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              Nenhuma instituição cadastrada ainda.
+              Nenhuma unidade cadastrada ainda.
             </div>
           ) : (
             <div className="space-y-6">
@@ -267,7 +267,7 @@ export default function InstitutionList() {
                               size="sm"
                               onClick={() => setEditingInstitution(institution)}
                               className="text-green-600 hover:text-green-700"
-                              title="Editar instituição"
+                              title="Editar unidade"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -290,7 +290,7 @@ export default function InstitutionList() {
                               size="sm"
                               onClick={() => deleteInstitution(institution.id, institution.nome)}
                               className="text-red-600 hover:text-red-700"
-                              title="Excluir instituição"
+                              title="Excluir unidade"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

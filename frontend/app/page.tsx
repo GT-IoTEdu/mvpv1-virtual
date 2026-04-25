@@ -147,7 +147,7 @@ export default function GTIoTEDULanding() {
             o uso de dispositivos IoT em
             <span className="text-green-400 font-semibold">
               {" "}
-              instituições acadêmicas
+              unidades acadêmicas
             </span>
             , oferecendo
             <span className="text-blue-400 font-semibold">
@@ -332,7 +332,7 @@ export default function GTIoTEDULanding() {
               Nossa Proposta
             </h2>
             <p className="text-2xl text-blue-400 font-semibold max-w-4xl mx-auto">
-              Simplificar e proteger o uso de dispositivos IoT em instituições
+              Simplificar e proteger o uso de dispositivos IoT em unidades
               acadêmicas.
             </p>
           </div>
@@ -577,7 +577,7 @@ export default function GTIoTEDULanding() {
                   Parceria estratégica com a RNP para desenvolvimento e
                   implementação da plataforma GT IoT-Edu, aproveitando a
                   infraestrutura nacional de rede acadêmica para conectar
-                  dispositivos IoT de forma segura e eficiente em instituições
+                  dispositivos IoT de forma segura e eficiente em unidades
                   de ensino superior.
                 </p>
 
@@ -612,7 +612,7 @@ export default function GTIoTEDULanding() {
                       Comunidade Acadêmica
                     </h4>
                     <p className="text-slate-400 text-sm">
-                      Suporte especializado para instituições
+                      Suporte especializado para unidades
                     </p>
                   </div>
                 </div>
@@ -642,7 +642,7 @@ export default function GTIoTEDULanding() {
               Apoio Institucional
             </h2>
             <p className="text-xl text-slate-300 max-w-4xl mx-auto">
-              Projeto desenvolvido com o apoio de importantes instituições de
+              Projeto desenvolvido com o apoio de importantes unidades de
               ensino superior do Brasil.
             </p>
           </div>

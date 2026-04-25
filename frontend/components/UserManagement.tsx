@@ -223,7 +223,7 @@ export default function UserManagementComponent() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Usuário</TableHead>
-                  <TableHead>Instituição</TableHead>
+                  <TableHead>Unidade</TableHead>
                   <TableHead>Cidade</TableHead>
                   <TableHead>Permissão</TableHead>
                   <TableHead>Status</TableHead>

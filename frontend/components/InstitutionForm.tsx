@@ -73,11 +73,11 @@ export default function InstitutionForm() {
 
   const validateForm = (): boolean => {
     if (!formData.nome.trim()) {
-      setError("Nome da instituição é obrigatório");
+      setError("Nome da unidade é obrigatório");
       return false;
     }
     
-    // Validação removida - permitir múltiplos campi da mesma instituição
+    // Validação removida - permitir múltiplos campi da mesma unidade
     if (!formData.cidade.trim()) {
       setError("Cidade é obrigatória");
       return false;
@@ -157,12 +157,12 @@ export default function InstitutionForm() {
         const errorData = await response.json();
         // Tratar erro específico de nome duplicado
         if (response.status === 400 && errorData.detail && errorData.detail.includes("já existe")) {
-          throw new Error(`Já existe uma instituição com o nome "${formData.nome}". Escolha outro nome.`);
+          throw new Error(`Já existe uma unidade com o nome "${formData.nome}". Escolha outro nome.`);
         }
-        throw new Error(errorData.detail || "Erro ao cadastrar instituição");
+        throw new Error(errorData.detail || "Erro ao cadastrar unidade");
       }
 
-      setSuccess("Instituição cadastrada com sucesso!");
+      setSuccess("Unidade cadastrada com sucesso!");
       
       // Limpar formulário após sucesso
       setFormData({
@@ -192,10 +192,10 @@ export default function InstitutionForm() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          Cadastro de Instituição
+          Cadastro de Unidade
         </CardTitle>
         <CardDescription>
-          Cadastre uma nova instituição com suas configurações de rede
+          Cadastre uma nova unidade com suas configurações de rede
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -206,7 +206,7 @@ export default function InstitutionForm() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome da Instituição *</Label>
+                <Label htmlFor="nome">Nome da Unidade *</Label>
                 <Input
                   id="nome"
                   type="text"
@@ -359,7 +359,7 @@ export default function InstitutionForm() {
 
           {/* Range de IPs */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Range de IPs da Instituição</h3>
+            <h3 className="text-lg font-medium">Range de IPs da Unidade</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">

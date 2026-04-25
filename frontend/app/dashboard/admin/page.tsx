@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
   // Verificar se é ADMIN ou MANAGER (não SUPERUSER) e tem rede atribuída
   // Nota: MANAGER pode existir no banco de dados antigo, mas o sistema atual usa ADMIN
   // SUPERUSER nunca deve ver o menu "Minha Rede", mesmo que tenha institution_id
-  // SUPERUSER já tem a aba "Instituições" para gerenciar redes e atribuir administradores
+  // SUPERUSER já tem a aba "Unidades" para gerenciar redes e atribuir administradores
   const isSuperUser = currentPermission === "SUPERUSER" || userFromStorage?.permission === "SUPERUSER";
   const isAdminWithNetwork = !isSuperUser
     && (currentPermission === "ADMIN" || currentPermission === "MANAGER") 
@@ -271,7 +271,7 @@ export default function AdminDashboardPage() {
             {isAdminWithNetwork && !isSuperUser && (
               <TabsTrigger value="my-network">Minha Rede</TabsTrigger>
             )}
-            <TabsTrigger value="settings">Instituições</TabsTrigger>
+            <TabsTrigger value="settings">Unidades</TabsTrigger>
           </TabsList>
 
           {/* Visão Geral */}
@@ -294,7 +294,7 @@ export default function AdminDashboardPage() {
                       <p className="text-sm text-gray-600">Gerencie permissões e visualize informações dos usuários</p>
                     </div>
                     <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold text-purple-600">🏢 Instituições</h3>
+                      <h3 className="font-semibold text-purple-600">🏢 Unidades</h3>
                       <p className="text-sm text-gray-600">Cadastre e gerencie campus e gestores de rede</p>
                     </div>
                   </div>
@@ -392,7 +392,7 @@ export default function AdminDashboardPage() {
             </TabsContent>
           )}
 
-          {/* Instituições */}
+          {/* Unidades */}
           <TabsContent value="settings" className="space-y-6">
             <InstitutionForm />
             <InstitutionList />

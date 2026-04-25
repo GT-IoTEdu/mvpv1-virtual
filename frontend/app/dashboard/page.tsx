@@ -826,7 +826,7 @@ export default function DashboardPage() {
   // Carregar alertas Suricata do banco (interface usa só dados do banco; SSE só dispara refetch)
   const fetchSuricataAlertsFromDb = useCallback(async (silent = false, page = 0) => {
     if (userId == null && institutionId == null) {
-      if (!silent) setSuricataError("É necessário estar logado (user/instituição) para carregar os alertas.");
+      if (!silent) setSuricataError("É necessário estar logado (user/unidade) para carregar os alertas.");
       return;
     }
     if (!silent) {
@@ -877,7 +877,7 @@ export default function DashboardPage() {
   // Carregar alertas Snort do banco (paginado 10 por página)
   const fetchSnortAlertsFromDb = useCallback(async (silent = false, page = 0) => {
     if (userId == null && institutionId == null) {
-      if (!silent) setSnortError("É necessário estar logado (user/instituição) para carregar os alertas.");
+      if (!silent) setSnortError("É necessário estar logado (user/unidade) para carregar os alertas.");
       return;
     }
     if (!silent) {
@@ -1445,7 +1445,7 @@ export default function DashboardPage() {
               }
             }
 
-            // Verificar se o usuário precisa selecionar uma instituição
+            // Verificar se o usuário precisa selecionar uma unidade
             // Apenas para usuários não-superuser e que não tenham institution_id
             if (backendPermission !== "SUPERUSER" && !institutionId) {
               setShowInstitutionSelector(true);
@@ -1469,7 +1469,7 @@ export default function DashboardPage() {
             // Se não conseguir buscar do backend, usar dados do localStorage
             const localInstitutionId = data?.institution_id;
             
-            // Verificar se o usuário precisa selecionar uma instituição
+            // Verificar se o usuário precisa selecionar uma unidade
             if (data?.permission !== "SUPERUSER" && !localInstitutionId) {
               setShowInstitutionSelector(true);
               setUserDataLoaded(true);
@@ -1493,7 +1493,7 @@ export default function DashboardPage() {
           // Se falhar, usar dados do localStorage
           const localInstitutionId = data?.institution_id;
           
-          // Verificar se o usuário precisa selecionar uma instituição
+          // Verificar se o usuário precisa selecionar uma unidade
           if (data?.permission !== "SUPERUSER" && !localInstitutionId) {
             setShowInstitutionSelector(true);
             setUserDataLoaded(true);
@@ -1539,7 +1539,7 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json();
           setMyInstitution(data.institution);
-          // Verificar status dos serviços após carregar a instituição
+          // Verificar status dos serviços após carregar a unidade
           if (data.institution) {
             checkServiceStatus(data.institution);
           }
@@ -1939,7 +1939,7 @@ export default function DashboardPage() {
   // Carregar alertas Zeek do banco (mesmo padrão Suricata/Snort: GET /api/scanners/zeek/alerts)
   const fetchZeekAlertsFromDb = useCallback(async (silent = false, page = 0) => {
     if (userId == null && institutionId == null) {
-      if (!silent) setZeekError("É necessário estar logado (user/instituição) para carregar os alertas do Zeek.");
+      if (!silent) setZeekError("É necessário estar logado (user/unidade) para carregar os alertas do Zeek.");
       return;
     }
     if (!silent) {
@@ -2488,7 +2488,7 @@ export default function DashboardPage() {
     return (first + last).toUpperCase();
   }, [name, email]);
 
-  // Mostrar seletor de instituição se necessário
+  // Mostrar seletor de unidade se necessário
   if (showInstitutionSelector) {
     return (
       <InstitutionSelector
