@@ -1,0 +1,16 @@
+{
+  "name": "iotedu-api-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000,
+    "transform": {}
+  }
+}

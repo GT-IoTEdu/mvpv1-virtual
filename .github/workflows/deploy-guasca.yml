@@ -41,3 +41,15 @@ jobs:
                 ./ "$GUASCA_USER@$GUASCA_HOST:/home/cristhian/mvpv1-virtual/"
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
             'bash /home/cristhian/mvpv1-virtual/scripts/guasca-deploy.sh'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run API integration tests against production
+        working-directory: tests
+        env:
+          BASE_URL: https://mvp.iotedu.org
+        run: |
+          npm install --silent
+          npm test

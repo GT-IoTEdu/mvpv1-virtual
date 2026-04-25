@@ -384,13 +384,28 @@ async def root():
 @app.get("/health", summary="Verificação de saúde")
 async def health_check():
     """
-    Endpoint para verificação de saúde da API.
-    
-    Returns:
-        dict: Status da API
+    Liveness + readiness: 200 só se a aplicação consegue tocar o banco.
+    Falha aqui = smoke test do CI fica vermelho = deploy é marcado como
+    falhou, evitando regressões silenciosas tipo "Unknown database".
     """
-    return {
-        "status": "healthy",
-        "timestamp": "2024-01-01T00:00:00Z",
-        "version": "2.0.0"
-    } 
+    from sqlalchemy import text
+    from db.session import SessionLocal
+    from datetime import datetime, timezone
+    try:
+        with SessionLocal() as db:
+            db.execute(text("SELECT 1")).scalar()
+        db_ok = True
+    except Exception as exc:
+        logger.error("/health DB probe failed: %s", exc)
+        db_ok = False
+
+    payload = {
+        "status": "healthy" if db_ok else "degraded",
+        "db": "ok" if db_ok else "fail",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2.0.0",
+    }
+    if not db_ok:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content=payload)
+    return payload
