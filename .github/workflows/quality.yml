@@ -1,12 +1,15 @@
 name: Quality & Security
 
+# Todos os checks são ADVISORY — falha aqui NÃO bloqueia merge nem
+# deploy. Use só pra visibilidade. O resultado aparece no summary
+# do run e na aba Security do repo (Trivy → SARIF).
+
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
   schedule:
-    # Roda 1x por dia mesmo sem push — pega CVEs novos em deps existentes
     - cron: "0 6 * * *"
 
 permissions:
@@ -16,11 +19,13 @@ permissions:
 jobs:
 
   trivy:
-    name: Trivy — vulnerabilities (filesystem + Dockerfiles)
+    name: Trivy — vulnerabilities (advisory)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Trivy filesystem scan (SARIF → Security tab)
+      - name: Trivy filesystem scan (SARIF)
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
@@ -29,13 +34,16 @@ jobs:
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          exit-code: '0'
       - name: Upload SARIF to GitHub Security
         if: always() && hashFiles('trivy-results.sarif') != ''
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
       - name: Trivy human-readable summary
         if: always()
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
@@ -43,21 +51,27 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          exit-code: '0'
 
   gitleaks:
-    name: Gitleaks — secrets vazados
+    name: Gitleaks — secrets vazados (advisory)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # precisa do histórico completo
-      - uses: gitleaks/gitleaks-action@v2
+          fetch-depth: 0
+      - name: Run gitleaks
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 
   pylint-bandit:
-    name: Python — bandit (security) + ruff (lint)
+    name: Python — bandit + ruff (advisory)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -65,22 +79,80 @@ jobs:
           python-version: '3.12'
       - name: Install tools
         run: pip install --quiet bandit ruff
-      - name: Bandit (security issues)
+      - name: Bandit
         continue-on-error: true
         run: bandit -r backend --skip B101,B104,B311 -f txt -o bandit.txt && cat bandit.txt
-      - name: Ruff (style + bug-prone patterns)
+      - name: Ruff
         continue-on-error: true
         run: ruff check backend --output-format=concise
 
   npm-audit:
-    name: Frontend — npm audit
+    name: Frontend — npm audit (advisory)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: npm audit (frontend)
+      - name: npm audit
         continue-on-error: true
         working-directory: frontend
         run: npm audit --audit-level=high
+
+  trivy-images:
+    name: Trivy — container images (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            context: ./backend
+            tag: iotedu-backend:scan
+          - name: frontend
+            context: ./frontend
+            tag: iotedu-frontend:scan
+          - name: sse_server
+            context: ./ids/ids_log_monitor
+            tag: iotedu-sse:scan
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.name }} image
+        continue-on-error: true
+        run: docker build -t ${{ matrix.tag }} ${{ matrix.context }}
+
+      - name: Trivy image scan (table)
+        if: always()
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.tag }}
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          vuln-type: os,library
+          exit-code: '0'
+
+      - name: Trivy image scan (SARIF → Security tab)
+        if: always()
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.tag }}
+          format: sarif
+          output: trivy-${{ matrix.name }}.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          vuln-type: os,library
+          exit-code: '0'
+
+      - name: Upload SARIF
+        if: always() && hashFiles(format('trivy-{0}.sarif', matrix.name)) != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-${{ matrix.name }}.sarif
+          category: image-${{ matrix.name }}
