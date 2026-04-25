@@ -33,5 +33,7 @@ if __name__ == "__main__":
         host=backend_host,
         port=backend_port,
         reload=backend_reload,
-        log_level="info"
+        log_level="info",
+        proxy_headers=True,
+        forwarded_allow_ips="*",
     )
