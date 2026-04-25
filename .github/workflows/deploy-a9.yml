@@ -30,7 +30,7 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Sync repo to a9 and deploy
         env:
