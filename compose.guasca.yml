@@ -1,0 +1,29 @@
+name: iotedu-mvp
+
+services:
+  db:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: !reset []
+    volumes:
+      - iotedu_mvp_db_data:/var/lib/mysql
+
+  backend:
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  frontend:
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  sse_server:
+    build: ./ids/ids_log_monitor
+    volumes:
+      - ./ids/logs:/ids/logs:ro
+    restart: unless-stopped
+
+volumes:
+  iotedu_mvp_db_data:

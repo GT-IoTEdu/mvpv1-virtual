@@ -1,11 +1,16 @@
-"""OIDC login via Keycloak (idp.anonshield.org realm anonshield).
+"""OIDC login multi-provider (Keycloak / qualquer OIDC compliant).
 
-Espelha o padrão do google_auth.py: popup OAuth, postMessage para o opener.
-Configurado por env (IOTEDU_*), agnóstico ao IDP — funciona com qualquer
-provider OIDC compliant trocando IOTEDU_DISCOVERY_URL.
+Discovery por env: cada provider declara IDP_<NAME>_DISCOVERY_URL
+(+CLIENT_ID/CLIENT_SECRET/REDIRECT_URI/POST_LOGOUT_URI). O nome do
+provider vira o segmento de URL (`/api/auth/<name>/login`) e o valor
+do campo `provider` no postMessage do callback.
+
+Backwards-compat: variáveis IOTEDU_* legadas continuam registrando o
+provider 'iotedu'.
 """
 import logging
 import os
+import re
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urlencode
@@ -23,29 +28,56 @@ from db.session import SessionLocal
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-PROVIDER = "iotedu"
-DISCOVERY_URL = os.getenv("IOTEDU_DISCOVERY_URL")
-CLIENT_ID = os.getenv("IOTEDU_CLIENT_ID")
-CLIENT_SECRET = os.getenv("IOTEDU_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("IOTEDU_REDIRECT_URI")
-POST_LOGOUT_URI = os.getenv("IDP_CLIENT_POST_LOGOUT_URI")
 
+def _discover_providers() -> dict[str, dict]:
+    cfg: dict[str, dict] = {}
+    pattern = re.compile(r"^IDP_([A-Z0-9]+)_DISCOVERY_URL$")
+    for key, val in os.environ.items():
+        m = pattern.match(key)
+        if not m or not val:
+            continue
+        name = m.group(1).lower()
+        prefix = f"IDP_{m.group(1)}"
+        cfg[name] = {
+            "discovery_url": val,
+            "client_id": os.getenv(f"{prefix}_CLIENT_ID"),
+            "client_secret": os.getenv(f"{prefix}_CLIENT_SECRET"),
+            "redirect_uri": os.getenv(f"{prefix}_REDIRECT_URI"),
+            "post_logout_uri": os.getenv(f"{prefix}_POST_LOGOUT_URI"),
+        }
+
+    if "iotedu" not in cfg and os.getenv("IOTEDU_DISCOVERY_URL"):
+        cfg["iotedu"] = {
+            "discovery_url": os.getenv("IOTEDU_DISCOVERY_URL"),
+            "client_id": os.getenv("IOTEDU_CLIENT_ID"),
+            "client_secret": os.getenv("IOTEDU_CLIENT_SECRET"),
+            "redirect_uri": os.getenv("IOTEDU_REDIRECT_URI"),
+            "post_logout_uri": os.getenv("IDP_CLIENT_POST_LOGOUT_URI"),
+        }
+    return cfg
+
+
+PROVIDERS = _discover_providers()
 oauth = OAuth()
-if DISCOVERY_URL and CLIENT_ID and CLIENT_SECRET:
-    oauth.register(
-        name=PROVIDER,
-        server_metadata_url=DISCOVERY_URL,
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        client_kwargs={"scope": "openid email profile", "code_challenge_method": "S256"},
-    )
-else:
-    logger.warning("OIDC iotedu: env incomplete; /login will return 503")
+for _name, _c in PROVIDERS.items():
+    if _c["discovery_url"] and _c["client_id"] and _c["client_secret"]:
+        oauth.register(
+            name=_name,
+            server_metadata_url=_c["discovery_url"],
+            client_id=_c["client_id"],
+            client_secret=_c["client_secret"],
+            client_kwargs={"scope": "openid email profile", "code_challenge_method": "S256"},
+        )
+        logger.info("OIDC provider registered: %s", _name)
+    else:
+        logger.warning("OIDC %s: env incomplete; /login will 503", _name)
 
 
-def _ensure_configured():
-    if PROVIDER not in oauth._registry:
-        raise HTTPException(status_code=503, detail="OIDC provider not configured")
+def _client(provider: str):
+    client = getattr(oauth, provider, None)
+    if client is None:
+        raise HTTPException(status_code=404, detail=f"unknown OIDC provider '{provider}'")
+    return client
 
 
 def _provision_user(db, claims: dict, request: Request) -> User:
@@ -72,7 +104,7 @@ def _provision_user(db, claims: dict, request: Request) -> User:
         user = User(
             email=email,
             nome=name,
-            instituicao="IoT-EDU" if is_admin else None,
+            instituicao="IoT-Edu" if is_admin else None,
             permission=UserPermission.SUPERUSER if is_admin else UserPermission.USER,
             keycloak_sub=sub,
             picture=picture,
@@ -92,7 +124,7 @@ def _provision_user(db, claims: dict, request: Request) -> User:
         if is_admin and user.permission != UserPermission.SUPERUSER:
             user.permission = UserPermission.SUPERUSER
             if not user.instituicao:
-                user.instituicao = "IoT-EDU"
+                user.instituicao = "IoT-Edu"
 
     user.ultimo_login = datetime.utcnow()
     db.add(user)
@@ -111,56 +143,65 @@ def _provision_user(db, claims: dict, request: Request) -> User:
                     db.commit()
                     db.refresh(user)
         except Exception as exc:
-            logger.warning("OIDC iotedu: institution detection failed: %s", exc)
+            logger.warning("OIDC %s: institution detection failed: %s", "_provisioning", exc)
 
     return user
 
 
-@router.get("/login", summary="Inicia login OIDC (Keycloak)")
-async def login(request: Request):
-    _ensure_configured()
-    if not REDIRECT_URI:
-        raise HTTPException(status_code=503, detail="IOTEDU_REDIRECT_URI not set")
-    stale = [k for k in list(request.session.keys()) if k.startswith("_state_iotedu_")]
+def _state_key_prefix(provider: str) -> str:
+    return f"_state_{provider}_"
+
+
+@router.get("/providers", summary="Lista IdPs configurados")
+async def list_providers():
+    return {"providers": [
+        {"name": n, "configured": bool(c["client_id"] and c["client_secret"])}
+        for n, c in PROVIDERS.items()
+    ]}
+
+
+@router.get("/{provider}/login", summary="Inicia login OIDC")
+async def login(provider: str, request: Request):
+    client = _client(provider)
+    cfg = PROVIDERS[provider]
+    if not cfg["redirect_uri"]:
+        raise HTTPException(status_code=503, detail=f"redirect_uri not set for {provider}")
+    prefix = _state_key_prefix(provider)
+    stale = [k for k in list(request.session.keys()) if k.startswith(prefix)]
     for k in stale:
         request.session.pop(k, None)
-    if stale:
-        logger.info("OIDC iotedu login: cleared %d stale state(s)", len(stale))
-    return await oauth.iotedu.authorize_redirect(request, REDIRECT_URI)
+    return await client.authorize_redirect(request, cfg["redirect_uri"])
 
 
-@router.get("/callback", summary="Callback OIDC")
-async def callback(request: Request):
-    _ensure_configured()
-    state_keys = [k for k in request.session.keys() if k.startswith("_state_iotedu_")]
-    logger.info("OIDC iotedu callback: state in URL=%s; session has %d state(s): %s",
-                request.query_params.get("state"), len(state_keys), state_keys)
+@router.get("/{provider}/callback", summary="Callback OIDC")
+async def callback(provider: str, request: Request):
+    client = _client(provider)
     try:
-        token = await oauth.iotedu.authorize_access_token(request)
+        token = await client.authorize_access_token(request)
     except OAuthError as exc:
-        logger.warning("OIDC iotedu callback error: %s", exc)
+        logger.warning("OIDC %s callback error: %s", provider, exc)
         raise HTTPException(status_code=400, detail=f"OIDC error: {exc.error}")
 
     claims = token.get("userinfo") or {}
     if not claims:
         try:
-            resp = await oauth.iotedu.userinfo(token=token)
+            resp = await client.userinfo(token=token)
             claims = dict(resp)
         except Exception as exc:
-            logger.error("OIDC iotedu userinfo fetch failed: %s", exc)
+            logger.error("OIDC %s userinfo fetch failed: %s", provider, exc)
             raise HTTPException(status_code=502, detail="Failed to fetch userinfo")
 
     with SessionLocal() as db:
         user = _provision_user(db, claims, request)
         permission = user.permission.value if user.permission else "USER"
         request.session["email"] = user.email
-        request.session["auth_provider"] = PROVIDER
+        request.session["auth_provider"] = provider
 
         return HTMLResponse(f"""
         <script>
           if (window.opener) {{
             window.opener.postMessage({{
-              provider: "{PROVIDER}",
+              provider: {repr(provider)},
               user_id: {user.id},
               name: {repr(user.nome or "")},
               email: {repr(user.email)},
@@ -175,32 +216,33 @@ async def callback(request: Request):
         """)
 
 
-@router.get("/logout", summary="Logout RP-initiated no IdP")
-async def logout(request: Request):
-    """Encerra a sessão local e redireciona ao end_session_endpoint do IdP."""
+@router.get("/{provider}/logout", summary="Logout RP-initiated no IdP")
+async def logout(provider: str, request: Request):
+    cfg = PROVIDERS.get(provider)
     request.session.clear()
-    if PROVIDER not in oauth._registry:
+    if not cfg or not cfg["discovery_url"]:
         return RedirectResponse(url="/")
 
     try:
         async with httpx.AsyncClient(timeout=10) as client:
-            meta = (await client.get(DISCOVERY_URL)).json()
+            meta = (await client.get(cfg["discovery_url"])).json()
         end_session = meta.get("end_session_endpoint")
     except Exception as exc:
-        logger.warning("OIDC iotedu: discovery fetch failed: %s", exc)
+        logger.warning("OIDC %s discovery fetch failed: %s", provider, exc)
         end_session = None
 
     if not end_session:
-        return RedirectResponse(url=POST_LOGOUT_URI or "/")
+        return RedirectResponse(url=cfg.get("post_logout_uri") or "/")
 
-    params = {"client_id": CLIENT_ID}
-    if POST_LOGOUT_URI:
-        params["post_logout_redirect_uri"] = POST_LOGOUT_URI
+    params = {"client_id": cfg["client_id"]}
+    if cfg.get("post_logout_uri"):
+        params["post_logout_redirect_uri"] = cfg["post_logout_uri"]
     return RedirectResponse(url=f"{end_session}?{urlencode(params)}")
 
 
-@router.get("/me", summary="Usuário autenticado via OIDC")
-async def me(request: Request, email: Optional[str] = None):
+@router.get("/{provider}/me", summary="Usuário autenticado via OIDC")
+async def me(provider: str, request: Request, email: Optional[str] = None):
+    _client(provider)
     user_email = email or request.session.get("email")
     if not user_email:
         raise HTTPException(status_code=401, detail="Não autenticado")

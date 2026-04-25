@@ -1,0 +1,41 @@
+name: Deploy to guasca
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-guasca
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'GT-IoTEdu/mvpv1-virtual'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GUASCA_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.GUASCA_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Sync repo to guasca and deploy
+        env:
+          GUASCA_HOST: ${{ secrets.GUASCA_HOST }}
+          GUASCA_USER: ${{ secrets.GUASCA_USER }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" 'mkdir -p /home/cristhian/mvpv1-virtual'
+          rsync -az --delete --exclude='.git' --exclude='backend/.env' \
+                -e "ssh -i $HOME/.ssh/id_ed25519" \
+                ./ "$GUASCA_USER@$GUASCA_HOST:/home/cristhian/mvpv1-virtual/"
+          ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
+            'bash /home/cristhian/mvpv1-virtual/scripts/guasca-deploy.sh'
