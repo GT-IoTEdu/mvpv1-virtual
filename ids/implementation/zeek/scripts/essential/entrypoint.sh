@@ -86,8 +86,24 @@ zeekctl cleanup 2>/dev/null || true
 
 sleep 2
 
-echo "[Zeek Entrypoint] Iniciando deploy do Zeek..."
-if ! zeekctl deploy 2>&1; then
+ZMQ_BASE_PORT="${ZEEK_ZMQ_BASE_PORT:-37760}"
+ZMQ_AUTO_FILE=/usr/local/zeek/spool/installed-scripts-do-not-touch/auto/zeekctl-config.zeek
+
+echo "[Zeek Entrypoint] zeekctl check + install..."
+if ! zeekctl check 2>&1; then
+    echo "[Zeek Entrypoint] ERRO no zeekctl check"
+    exit 1
+fi
+zeekctl install 2>&1 || { echo "[Zeek Entrypoint] ERRO no zeekctl install"; exit 1; }
+
+if [ -f "$ZMQ_AUTO_FILE" ]; then
+    echo "[Zeek Entrypoint] Re-mapeando portas ZeroMQ para base=${ZMQ_BASE_PORT}..."
+    sed -i "s|tcp://127.0.0.1:27760|tcp://127.0.0.1:${ZMQ_BASE_PORT}|g" "$ZMQ_AUTO_FILE"
+    sed -i "s|tcp://127.0.0.1:27761|tcp://127.0.0.1:$((ZMQ_BASE_PORT+1))|g" "$ZMQ_AUTO_FILE"
+fi
+
+echo "[Zeek Entrypoint] Iniciando Zeek..."
+if ! zeekctl start 2>&1; then
     echo "[Zeek Entrypoint] ERRO ao rodar zeekctl deploy!";
     echo "[Zeek Entrypoint] Verificando logs de erro...";
     if [ -f /usr/local/zeek/spool/zeek/zeekctl.err ]; then
