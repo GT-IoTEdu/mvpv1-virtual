@@ -94,7 +94,7 @@ jobs:
           fi
 
       - name: Publish JUnit report (Checks tab)
-        if: always()
+        if: always() && hashFiles('tests/junit.xml') != ''
         uses: dorny/test-reporter@v1
         with:
           name: API tests — a9 (iotedu.anonshield.org)

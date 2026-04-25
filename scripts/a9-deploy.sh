@@ -15,6 +15,13 @@ cd "$REPO_DIR"
 exec 9>"$REPO_DIR/.deploy.lock"
 flock -n 9 || { echo "deploy already in progress" >&2; exit 1; }
 
+# Garante cron de backup do MySQL (idempotente)
+BACKUP_LINE="0 3 * * * MYSQL_CONTAINER=${COMPOSE_PROJECT_NAME}-db-1 $REPO_DIR/scripts/backup-mysql.sh >> $REPO_DIR/.backup.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF "$REPO_DIR/scripts/backup-mysql.sh"; then
+    (crontab -l 2>/dev/null; echo "$BACKUP_LINE") | crontab -
+    echo "cron de backup instalado"
+fi
+
 export COMPOSE_PROJECT_NAME
 
 docker compose "${COMPOSE_FILES[@]}" up -d --build "${SERVICES[@]}"
