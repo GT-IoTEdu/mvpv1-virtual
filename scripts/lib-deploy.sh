@@ -192,6 +192,9 @@ run_ids() {
 }
 
 # --- Caddy (em container, no a9) ----------------------------------------
+# Modo "attach": já existe um Caddy gerenciado fora do nosso projeto
+# (ex.: web-caddy-1 no a9 que serve outros sites). A gente só conecta
+# ele à nossa rede pra que resolva os containers da app por nome.
 attach_caddy() {
     [ -n "${CADDY_CONTAINER:-}" ] || return 0
     if ! docker inspect "$CADDY_CONTAINER" >/dev/null 2>&1; then
@@ -205,6 +208,45 @@ attach_caddy() {
     fi
     log "conectando $CADDY_CONTAINER à rede $NET"
     docker network connect "$NET" "$CADDY_CONTAINER"
+}
+
+# Modo "owned": a gente sobe um Caddy próprio em container, com
+# Caddyfile gerado a partir de $CADDY_DOMAIN. Usado em hosts que NÃO
+# têm Caddy instalado nativamente. Caddy entra na mesma rede docker do
+# projeto e proxia por nome (backend, frontend) — backend/frontend
+# nesses casos não publicam porta no host.
+ensure_caddy_container() {
+    [ -n "${CADDY_DOMAIN:-}" ] || return 0
+    local name="${PROJECT}-caddy-1"
+    local conf_dir="$REPO_DIR/.caddy"
+    local conf_file="$conf_dir/Caddyfile"
+
+    mkdir -p "$conf_dir"
+    cat > "$conf_file" <<EOF
+${CADDY_DOMAIN} {
+    handle /api/*       { reverse_proxy backend:8000 }
+    handle /auth/*      { reverse_proxy backend:8000 }
+    handle /docs*       { reverse_proxy backend:8000 }
+    handle /openapi.json { reverse_proxy backend:8000 }
+    handle /health      { reverse_proxy backend:8000 }
+    handle              { reverse_proxy frontend:3000 }
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+EOF
+    docker rm -f "$name" >/dev/null 2>&1 || true
+    log "subindo Caddy próprio em container ($CADDY_DOMAIN, ports 80/443)"
+    docker run -d --name "$name" \
+        --network "$NET" \
+        --restart unless-stopped \
+        -p 80:80 -p 443:443 -p 443:443/udp \
+        -v "$conf_file:/etc/caddy/Caddyfile:ro" \
+        -v "${PROJECT}-caddy-data:/data" \
+        -v "${PROJECT}-caddy-config:/config" \
+        caddy:2-alpine >/dev/null
 }
 
 # --- backup automático --------------------------------------------------
@@ -267,8 +309,7 @@ deploy() {
 
     ensure_backup_cron
     ensure_network
-    attach_caddy            # Caddy entra na rede ANTES de recriarmos backend/frontend,
-                            # pra que o DNS interno resolva o container novo sem janela de 502.
+    attach_caddy             # modo "Caddy externo já existente" (a9)
     build_images
 
     ensure_db
@@ -278,6 +319,7 @@ deploy() {
     run_app_container frontend "${PROJECT}/frontend:latest" 3000 "${HOST_PORT_FRONTEND:-3000}"
     run_sse
     run_ids
+    ensure_caddy_container   # modo "Caddy próprio em container" (hosts sem Caddy nativo)
 
     docker image prune -f >/dev/null
 
