@@ -23,22 +23,18 @@ RUN  apt-get install -y \
     curl\
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /backend 
-COPY . /backend
-# Create virtual environment
+WORKDIR /backend
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Upgrade pip
- 
+# Manifests primeiro → pip install vira layer cached enquanto
+# requirements.txt não mudar. Mudanças em código Python re-rodam
+# só o COPY (instantâneo).
+COPY requirements.txt ./
+RUN pip install --upgrade pip \
+ && pip install mysql-connector-python \
+ && pip install -r requirements.txt
 
-# Install Python dependencies
-RUN pip install mysql-connector-python
-
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-# Copy application code 
-# Install backend dependencies
- 
+COPY . /backend
 
 CMD ["/bin/bash","/backend/start.sh"]
