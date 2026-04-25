@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.repository == 'CristhianKapelinski/wticifes2026-iotedu'
+    if: github.repository == 'GT-IoTEdu/mvpv1-virtual'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -26,13 +26,16 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Trigger deploy on a9
+      - uses: actions/checkout@v4
+
+      - name: Sync repo to a9 and deploy
         env:
           A9_HOST: ${{ secrets.A9_HOST }}
           A9_USER: ${{ secrets.A9_USER }}
         run: |
+          ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" 'mkdir -p /home/cristhian/wticifes2026-iotedu'
+          rsync -az --delete --exclude='.git' --exclude='backend/.env' --exclude='.env' \
+                -e "ssh -i $HOME/.ssh/id_ed25519" \
+                ./ "$A9_USER@$A9_HOST:/home/cristhian/wticifes2026-iotedu/"
           ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" \
-            "cd /home/cristhian/wticifes2026-iotedu \
-             && git fetch --quiet origin main \
-             && git reset --hard origin/main \
-             && bash scripts/a9-deploy.sh"
+            'bash /home/cristhian/wticifes2026-iotedu/scripts/a9-deploy.sh'
