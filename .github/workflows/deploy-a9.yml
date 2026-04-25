@@ -46,7 +46,7 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" \
             'bash /home/cristhian/wticifes2026-iotedu/scripts/a9-deploy.sh'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 

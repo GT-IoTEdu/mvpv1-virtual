@@ -46,7 +46,7 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
             'bash /home/cristhian/mvpv1-virtual/scripts/guasca-deploy.sh'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 
