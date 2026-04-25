@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configurar SSH (deploy key do guasca)
         env:
@@ -50,11 +50,11 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
             'bash /home/cristhian/iotedu-testes/scripts/testes-deploy.sh'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -99,7 +99,7 @@ jobs:
 
       - name: Publicar relatório JUnit (aba Checks)
         if: always() && hashFiles('tests/junit.xml') != ''
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         with:
           name: API tests — testes.iotedu.org
           path: tests/junit.xml

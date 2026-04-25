@@ -30,7 +30,7 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Sync repo to a9 and deploy
         env:
@@ -46,11 +46,11 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 "$A9_USER@$A9_HOST" \
             'bash /home/cristhian/wticifes2026-iotedu/scripts/a9-deploy.sh'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: Publish JUnit report (Checks tab)
         if: always() && hashFiles('tests/junit.xml') != ''
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         with:
           name: API tests — a9 (iotedu.anonshield.org)
           path: tests/junit.xml
