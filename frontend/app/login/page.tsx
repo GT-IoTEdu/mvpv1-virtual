@@ -271,163 +271,97 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Login Options */}
-        <div className="w-full max-w-md space-y-6">
-          {/* CAFe Login */}
-          <Card
-            className={`border border-slate-700 bg-slate-800/30 p-4 text-center ${
-              !cafeEnabled ? "cursor-not-allowed opacity-70" : ""
-            }`}
-          >
-            <div className="mb-4">
-              <Image
-                src="/images/cafe-logo.png"
-                alt="CAFe - Comunidade Acadêmica Federada"
-                width={240}
-                height={80}
-                className="mx-auto"
-              />
-            </div>
-            <Button
-              disabled={!cafeEnabled}
-              className={`w-full text-white ${
-                cafeEnabled
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-blue-600/50 hover:bg-blue-600/50 cursor-not-allowed"
-              }`}
-              onClick={() => {
-                if (cafeEnabled) {
-                  // Lógica para autenticação com CAFe
-                  alert("Redirecionando para autenticação CAFe...");
-                }
-              }}
-            >
-              Clique aqui para acessar pelo login institucional
-            </Button>
-            {!cafeEnabled && (
-              <p className="text-xs text-slate-400 mt-2">
-                Opção desabilitada temporariamente
-              </p>
-            )}
+        {/* Login Options — single card, hierarchical buttons (Hick + Gestalt proximity) */}
+        <Card className="w-full max-w-md border border-slate-700 bg-slate-800/40 p-6">
+          <h2 className="text-base font-medium text-slate-300 mb-5 text-center">
+            Escolha como entrar
+          </h2>
 
-            {/* Botão para alternar estado (apenas para testes/desenvolvimento)
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                setCafeEnabled(!cafeEnabled);
-              }}
-              className="text-xs text-slate-500 mt-4 hover:text-blue-400 transition-colors underline"
-            >
-              {cafeEnabled ? "Desabilitar" : "Habilitar"} login CAFe (apenas para testes)
-            </button> */}
-          </Card>
-
-          {/* Google Login */}
-          <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Login com Google
-            </h2>
+          <div className="space-y-3">
+            {/* Primário: IdP IoTEdu (caminho institucional canônico) */}
             <Button
-              className="w-full bg-white hover:bg-gray-100 text-slate-800 flex items-center justify-center space-x-2"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              {!isLoading && (
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                </svg>
-              )}
-              {isLoading ? "Conectando..." : "Continuar com o Google"}
-            </Button>
-            {isLoading && (
-              <div className="mt-4 space-y-2">
-                <p className="text-sm text-slate-300">Se o popup não abriu, use as opções abaixo:</p>
-                <div className="flex gap-2 justify-center">
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => {
-                      try {
-                        const p = window.open(
-                          authPath("/api/auth/google/login"),
-                          "googleLogin",
-                          "width=500,height=600"
-                        );
-                        if (p) {
-                          p.focus();
-                          popupRef.current = p;
-                        }
-                      } catch {}
-                    }}
-                  >
-                    Reabrir popup
-                  </Button>
-                  <Button
-                    className="bg-slate-600 hover:bg-slate-700 text-white"
-                    onClick={() => {
-                      try { popupRef.current?.close(); } catch {}
-                      if (pollTimerRef.current) {
-                        window.clearInterval(pollTimerRef.current);
-                        pollTimerRef.current = null;
-                      }
-                      if (timeoutRef.current) {
-                        window.clearTimeout(timeoutRef.current);
-                        timeoutRef.current = null;
-                      }
-                      setIsLoading(false);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            )}
-          </Card>
-
-          {/* IdP IoTEdu (idp.iotedu.org) */}
-          <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              IdP IoTEdu
-            </h2>
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+              className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white h-11"
               onClick={() => handleIdpLogin("iotedu")}
-              disabled={idpLoadingProvider !== null}
+              disabled={idpLoadingProvider !== null || isLoading}
             >
-              {idpLoadingProvider !== "iotedu" && <KeyRound aria-hidden="true" className="w-5 h-5 mr-2" />}
-              {idpLoadingProvider === "iotedu" ? "Conectando..." : "Entrar com IdP IoTEdu"}
+              <KeyRound aria-hidden="true" className="w-5 h-5 mr-3" />
+              {idpLoadingProvider === "iotedu" ? "Conectando..." : "Continuar com IdP IoTEdu"}
             </Button>
-          </Card>
 
-          {/* IdP AnonShield (idp.anonshield.org) */}
-          <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              IdP AnonShield
-            </h2>
+            {/* Secundário: IdP AnonShield */}
             <Button
-              className="w-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center"
+              variant="outline"
+              className="w-full justify-start border-slate-600 bg-slate-800/60 text-slate-100 hover:bg-slate-700 h-11"
               onClick={() => handleIdpLogin("anonshield")}
-              disabled={idpLoadingProvider !== null}
+              disabled={idpLoadingProvider !== null || isLoading}
             >
-              {idpLoadingProvider !== "anonshield" && <KeyRound aria-hidden="true" className="w-5 h-5 mr-2" />}
-              {idpLoadingProvider === "anonshield" ? "Conectando..." : "Entrar com IdP AnonShield"}
+              <KeyRound aria-hidden="true" className="w-5 h-5 mr-3" />
+              {idpLoadingProvider === "anonshield" ? "Conectando..." : "Continuar com IdP AnonShield"}
             </Button>
-          </Card>
-        </div>
+
+            {/* Secundário: Google */}
+            <Button
+              variant="outline"
+              className="w-full justify-start border-slate-600 bg-slate-800/60 text-slate-100 hover:bg-slate-700 h-11"
+              onClick={handleGoogleLogin}
+              disabled={isLoading || idpLoadingProvider !== null}
+            >
+              <svg aria-hidden="true" className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              {isLoading ? "Conectando..." : "Continuar com Google"}
+            </Button>
+          </div>
+
+          {/* CAFe — fora da hierarquia principal, só link sutil quando ativar */}
+          {cafeEnabled && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-xs text-slate-500">
+                <div className="flex-1 border-t border-slate-700" />
+                <span>ou</span>
+                <div className="flex-1 border-t border-slate-700" />
+              </div>
+              <button
+                onClick={() => alert("Redirecionando para autenticação CAFe...")}
+                className="w-full text-sm text-blue-400 hover:text-blue-300 transition-colors py-2"
+              >
+                Login institucional via CAFe
+              </button>
+            </>
+          )}
+
+          {/* Recuperação de popup (mantido para Google que abre popup) */}
+          {isLoading && (
+            <div className="mt-4 flex gap-2 justify-center text-xs">
+              <button
+                className="text-blue-400 hover:text-blue-300 underline"
+                onClick={() => {
+                  try {
+                    const p = window.open(authPath("/api/auth/google/login"), "googleLogin", "width=500,height=600");
+                    if (p) { p.focus(); popupRef.current = p; }
+                  } catch {}
+                }}
+              >
+                Reabrir popup
+              </button>
+              <span className="text-slate-600">·</span>
+              <button
+                className="text-slate-400 hover:text-slate-300 underline"
+                onClick={() => {
+                  try { popupRef.current?.close(); } catch {}
+                  if (pollTimerRef.current) { window.clearInterval(pollTimerRef.current); pollTimerRef.current = null; }
+                  if (timeoutRef.current) { window.clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+                  setIsLoading(false);
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </Card>
 
         {/* Footer */}
         <div className="mt-10 text-center">

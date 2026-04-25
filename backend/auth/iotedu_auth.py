@@ -98,8 +98,8 @@ def _provision_user(db, claims: dict, request: Request) -> User:
         # como o mesmo user — sobrescreve `keycloak_sub` com o do login atual.
         user = db.query(User).filter(User.email == email).first()
 
-    admin_email = (app_config.SUPERUSER_ACCESS or "").lower()
-    is_admin = bool(admin_email) and email == admin_email
+    admin_emails = {e.strip().lower() for e in (app_config.SUPERUSER_ACCESS or "").split(",") if e.strip()}
+    is_admin = email in admin_emails
 
     if user is None:
         user = User(

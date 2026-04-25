@@ -80,8 +80,8 @@ async def google_callback(request: Request):
             raise HTTPException(status_code=400, detail="Email não encontrado no perfil do Google")
 
         # Verificar se o email corresponde ao admin configurado
-        admin_email = app_config.SUPERUSER_ACCESS
-        is_admin_email = email.lower() == admin_email.lower() if admin_email else False
+        admin_emails = {e.strip().lower() for e in (app_config.SUPERUSER_ACCESS or "").split(",") if e.strip()}
+        is_admin_email = email.lower() in admin_emails
 
         # Criar/atualizar usuário no banco
         with SessionLocal() as db:
