@@ -197,6 +197,8 @@ async def callback(provider: str, request: Request):
         permission = user.permission.value if user.permission else "USER"
         request.session["email"] = user.email
         request.session["auth_provider"] = provider
+        if token.get("id_token"):
+            request.session["id_token"] = token["id_token"]
 
         return HTMLResponse(f"""
         <script>
@@ -220,6 +222,7 @@ async def callback(provider: str, request: Request):
 @router.get("/{provider}/logout", summary="Logout RP-initiated no IdP")
 async def logout(provider: str, request: Request):
     cfg = PROVIDERS.get(provider)
+    id_token = request.session.get("id_token")
     request.session.clear()
     if not cfg or not cfg["discovery_url"]:
         return RedirectResponse(url="/")
@@ -236,6 +239,8 @@ async def logout(provider: str, request: Request):
         return RedirectResponse(url=cfg.get("post_logout_uri") or "/")
 
     params = {"client_id": cfg["client_id"]}
+    if id_token:
+        params["id_token_hint"] = id_token
     if cfg.get("post_logout_uri"):
         params["post_logout_redirect_uri"] = cfg["post_logout_uri"]
     return RedirectResponse(url=f"{end_session}?{urlencode(params)}")
