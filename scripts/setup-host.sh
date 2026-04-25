@@ -86,11 +86,18 @@ if ! VBoxManage list vms 2>/dev/null | grep -qE "^\"$VM_NAME\""; then
     mkdir -p "$PFSENSE_DIR/vms"
     VBoxManage import "$OVA_FILE" --vsys 0 --vmname "$VM_NAME" \
         --basefolder "$PFSENSE_DIR/vms"
+    # NIC 1 vai pro bridge-tap (sniffing). NIC 2/3 vêm da OVA bridgeados
+    # numa interface da máquina que importou — em outro host, essa
+    # interface não existe e o startvm falha. Desabilita.
     VBoxManage modifyvm "$VM_NAME" \
         --nic1 bridged --bridgeadapter1 bridge-tap --nicpromisc1 allow-all \
+        --nic2 none --nic3 none \
         --rtcuseutc on
 else
     log "VM '$VM_NAME' already imported"
+    # Garante que NICs extras estão desabilitadas mesmo em VMs já
+    # importadas em versões antigas do script (idempotente).
+    VBoxManage modifyvm "$VM_NAME" --nic2 none --nic3 none 2>/dev/null || true
 fi
 
 #--- 4. systemd unit for VM autostart -------------------------------------
