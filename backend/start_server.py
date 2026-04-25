@@ -16,8 +16,9 @@ load_dotenv()
 
 mysql_user = os.getenv("MYSQL_USER")
 mysql_password = os.getenv("MYSQL_PASSWORD")
-ip_b=os.getenv("NEXT_PUBLIC_IP_B")
-port_b=os.getenv("NEXT_PUBLIC_PORT_B")
+backend_host = os.getenv("BACKEND_HOST", "0.0.0.0")
+backend_port = int(os.getenv("BACKEND_PORT", "8000"))
+backend_reload = os.getenv("BACKEND_RELOAD", "false").lower() in ("1", "true", "yes")
 
 if not mysql_user or not mysql_password:
     print("❌ ERRO: MYSQL_USER e MYSQL_PASSWORD devem estar definidos no arquivo .env")
@@ -29,8 +30,8 @@ print("=" * 50)
 if __name__ == "__main__":
     uvicorn.run(
         "backend.main:app",
-        host=ip_b,
-        port=int(port_b),
-        reload=True,
+        host=backend_host,
+        port=backend_port,
+        reload=backend_reload,
         log_level="info"
     )
