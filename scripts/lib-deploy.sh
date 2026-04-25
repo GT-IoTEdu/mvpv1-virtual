@@ -217,21 +217,30 @@ ensure_backup_cron() {
 }
 
 # --- saúde + smoke ------------------------------------------------------
-# Window de 5min: backend roda migrations no boot, Caddy pode estar emitindo
-# cert TLS pela primeira vez (ACME challenge), DNS pode estar propagando.
-# 150 tentativas × 2s = 5min.
+# Probe DIRETO no container do backend pela rede docker — bypassa DNS público,
+# Caddy e TLS. Usa o IP interno do container. Garante apenas que backend +
+# DB estão de pé. Cobertura end-to-end (Caddy + cert + DNS) fica no smoke-test.
+# 90 tentativas × 2s = 3min, mais que suficiente pra migrations + uvicorn.
 wait_health() {
-    log "sondando $HEALTH_URL"
-    for _ in $(seq 1 150); do
-        if curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
+    local name="${PROJECT}-backend-1"
+    local ip
+    ip=$(docker inspect -f "{{(index .NetworkSettings.Networks \"$NET\").IPAddress}}" "$name" 2>/dev/null || echo "")
+    if [ -z "$ip" ]; then
+        log "ERRO: container $name sem IP em $NET"
+        return 1
+    fi
+    local url="http://${ip}:8000/health"
+    log "sondando $url (interno, via $NET)"
+    for _ in $(seq 1 90); do
+        if curl -fsS --max-time 5 "$url" >/dev/null 2>&1; then
             log "health: OK"
             return 0
         fi
         sleep 2
     done
-    log "ERRO: $HEALTH_URL não respondeu 200 em 5min"
+    log "ERRO: backend não respondeu 200 em 3min"
     docker ps --format 'table {{.Names}}\t{{.Status}}' | grep "${PROJECT}-" || true
-    docker logs --tail=40 "${PROJECT}-backend-1" || true
+    docker logs --tail=40 "$name" || true
     return 1
 }
 
