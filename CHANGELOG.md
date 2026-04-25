@@ -128,15 +128,18 @@ testes.iotedu.org        a9 + guasca (paralelo)
 ```
 
 - `testes` é a branch de iteração rápida (sem scans pesados).
-- `main` segue como branch de produção; convenção é mergear via PR de `testes`.
+- `main` é tratada como branch de produção: o fluxo correto é abrir PR de
+  `testes` → `main`, esperar `deploy-testes` ficar verde, mergear.
 - Push em feature branches não dispara nada — economiza CI minutes.
 
-> **Branch protection no main não está habilitada.** O GitHub bloqueia
-> branch protection / rulesets para repositórios privados em plano Free
-> (HTTP 403: *"Upgrade to GitHub Pro or make this repository public"*).
-> Repo é privado intencionalmente, então a regra "merge só via PR" é
-> seguida por convenção (não tem enforcement automático). Para ativar
-> protection, ou tornar o repo público, ou subir o plano da org pra Pro/Team.
+> **Sobre proteção do `main`:** o GitHub não libera branch protection /
+> rulesets em repositório privado no plano Free. Como o repo é privado
+> intencionalmente, a regra "merge só via PR de `testes`" não é imposta
+> pelo GitHub — é convenção do time. Quem tem permissão de push em `main`
+> pode tecnicamente burlar isso. Se um dia a org migrar para Pro/Team ou
+> o repo for tornado público, basta rodar a chamada de API de protection
+> (já vem documentada nos comentários do PR original) que a proteção
+> liga sem mais nada.
 
 ## 9. Setup-host idempotente
 
