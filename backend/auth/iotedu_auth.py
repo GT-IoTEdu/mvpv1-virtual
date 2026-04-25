@@ -167,10 +167,12 @@ async def login(provider: str, request: Request):
     cfg = PROVIDERS[provider]
     if not cfg["redirect_uri"]:
         raise HTTPException(status_code=503, detail=f"redirect_uri not set for {provider}")
-    prefix = _state_key_prefix(provider)
-    stale = [k for k in list(request.session.keys()) if k.startswith(prefix)]
-    for k in stale:
-        request.session.pop(k, None)
+    # Limpa estado OIDC de TODOS os providers + id_token + auth_provider.
+    # Acumular states de múltiplas tentativas (ex: usuário troca de IdP)
+    # estoura o limite de 4KB do cookie e produz mismatching_state.
+    for k in list(request.session.keys()):
+        if k.startswith("_state_") or k in ("id_token", "auth_provider"):
+            request.session.pop(k, None)
     return await client.authorize_redirect(request, cfg["redirect_uri"])
 
 

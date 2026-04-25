@@ -295,7 +295,7 @@ export default function LoginPage() {
               </div>
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => alert("Redirecionando para autenticação CAFe...")}
+                onClick={() => { window.location.href = authPath("/api/auth/cafe/login"); }}
               >
                 Clique aqui para acessar pelo login institucional
               </Button>

@@ -5,7 +5,10 @@ REPO_DIR="${REPO_DIR:-/home/cristhian/wticifes2026-iotedu}"
 HEALTH_URL="${HEALTH_URL:-https://iotedu.anonshield.org/health}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-iotedu-anonshield}"
 COMPOSE_FILES=(-f docker-compose.yml -f compose.a9.yml)
-SERVICES=(db backend frontend sse_server zeek suricata_ids snort_ids)
+SERVICES=(db backend frontend sse_server)
+if ip link show bridge-tap >/dev/null 2>&1; then
+    SERVICES+=(zeek suricata_ids snort_ids)
+fi
 
 cd "$REPO_DIR"
 
@@ -19,13 +22,18 @@ docker image prune -f >/dev/null
 
 for _ in $(seq 1 30); do
     if curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
-        echo "deploy ok"
-        exit 0
+        break
     fi
     sleep 2
 done
 
-echo "deploy: health check failed for $HEALTH_URL" >&2
-docker compose "${COMPOSE_FILES[@]}" ps
-docker compose "${COMPOSE_FILES[@]}" logs --tail=40 backend
-exit 1
+if ! curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "deploy: health probe failed for $HEALTH_URL" >&2
+    docker compose "${COMPOSE_FILES[@]}" ps
+    docker compose "${COMPOSE_FILES[@]}" logs --tail=40 backend
+    exit 1
+fi
+
+# Smoke test: bate em todos os endpoints críticos. Falha aqui = deploy falhou.
+BASE_URL="${HEALTH_URL%/health}"
+bash "$REPO_DIR/scripts/smoke-test.sh" "$BASE_URL"
