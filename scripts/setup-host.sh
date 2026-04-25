@@ -112,8 +112,17 @@ ExecStop=/usr/bin/VBoxManage controlvm $VM_NAME acpipowerbutton
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable --now iotedu-pfsense.service
-log "iotedu-pfsense.service active"
+if systemctl enable --now iotedu-pfsense.service; then
+    log "iotedu-pfsense.service active"
+else
+    log "ERRO: iotedu-pfsense.service falhou ao iniciar — verifique:"
+    log "  sudo systemctl status iotedu-pfsense.service --no-pager -l"
+    log "  sudo journalctl -xeu iotedu-pfsense.service --no-pager | tail -30"
+    log "Causas comuns: memória insuficiente (VM pede 9GB), NICs 2/3 bridgeados"
+    log "em interface inexistente (corrige com: VBoxManage modifyvm $VM_NAME --nic2 none --nic3 none),"
+    log "vboxdrv não carregado (modprobe vboxdrv) ou Secure Boot bloqueando módulos."
+    exit 1
+fi
 
 #--- 5. Summary ------------------------------------------------------------
 
