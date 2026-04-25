@@ -201,10 +201,10 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Carregando dashboard administrativo...</p>
+          <p className="text-slate-300">Carregando dashboard administrativo...</p>
         </div>
       </div>
     );
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <Alert className="max-w-md">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -221,14 +221,14 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-slate-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard Administrativo</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-slate-100">Dashboard Administrativo</h1>
+              <p className="text-slate-300 mt-1">
                 Bem-vindo, {adminName} ({adminEmail})
               </p>
             </div>
@@ -252,7 +252,7 @@ export default function AdminDashboardPage() {
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-rose-400 hover:text-rose-400 hover:bg-rose-950/40"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
@@ -285,17 +285,17 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-gray-600">
+                  <p className="text-slate-300">
                     Use as abas abaixo para gerenciar o sistema:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 border rounded-lg">
                       <h3 className="font-semibold text-blue-600">👥 Usuários</h3>
-                      <p className="text-sm text-gray-600">Gerencie permissões e visualize informações dos usuários</p>
+                      <p className="text-sm text-slate-300">Gerencie permissões e visualize informações dos usuários</p>
                     </div>
                     <div className="p-4 border rounded-lg">
                       <h3 className="font-semibold text-purple-600">🏢 Unidades</h3>
-                      <p className="text-sm text-gray-600">Cadastre e gerencie campus e gestores de rede</p>
+                      <p className="text-sm text-slate-300">Cadastre e gerencie campus e gestores de rede</p>
                     </div>
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export default function AdminDashboardPage() {
                 <Card>
                   <CardContent className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                    <p className="text-gray-600">Carregando dados da rede...</p>
+                    <p className="text-slate-300">Carregando dados da rede...</p>
                   </CardContent>
                 </Card>
               ) : myInstitution ? (
@@ -344,32 +344,32 @@ export default function AdminDashboardPage() {
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-500">Nome</label>
-                            <p className="text-gray-900">{myInstitution.nome}</p>
+                            <label className="text-sm font-medium text-slate-400">Nome</label>
+                            <p className="text-slate-100">{myInstitution.nome}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">Cidade</label>
-                            <p className="text-gray-900">{myInstitution.cidade}</p>
+                            <label className="text-sm font-medium text-slate-400">Cidade</label>
+                            <p className="text-slate-100">{myInstitution.cidade}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">URL Base pfSense</label>
-                            <p className="text-gray-900 break-all">{myInstitution.pfsense_base_url}</p>
+                            <label className="text-sm font-medium text-slate-400">URL Base pfSense</label>
+                            <p className="text-slate-100 break-all">{myInstitution.pfsense_base_url}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">URL Base Zeek</label>
-                            <p className="text-gray-900 break-all">{myInstitution.zeek_base_url}</p>
+                            <label className="text-sm font-medium text-slate-400">URL Base Zeek</label>
+                            <p className="text-slate-100 break-all">{myInstitution.zeek_base_url}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">IP Inicial</label>
-                            <p className="text-gray-900">{myInstitution.ip_range_start}</p>
+                            <label className="text-sm font-medium text-slate-400">IP Inicial</label>
+                            <p className="text-slate-100">{myInstitution.ip_range_start}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">IP Final</label>
-                            <p className="text-gray-900">{myInstitution.ip_range_end}</p>
+                            <label className="text-sm font-medium text-slate-400">IP Final</label>
+                            <p className="text-slate-100">{myInstitution.ip_range_end}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500">Status</label>
-                            <p className={`inline-block px-2 py-1 rounded text-sm ${myInstitution.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            <label className="text-sm font-medium text-slate-400">Status</label>
+                            <p className={`inline-block px-2 py-1 rounded text-sm ${myInstitution.is_active ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
                               {myInstitution.is_active ? 'Ativa' : 'Inativa'}
                             </p>
                           </div>
