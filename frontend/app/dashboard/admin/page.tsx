@@ -241,12 +241,14 @@ export default function AdminDashboardPage() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Atualizar
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push("/dashboard")}
-              >
-                Voltar ao Dashboard
-              </Button>
+              {!isSuperUser && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  Voltar ao Dashboard
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={handleLogout}
