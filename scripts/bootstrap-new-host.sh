@@ -136,12 +136,24 @@ if [ "$CADDY_MODE" = "host" ]; then
         sudo tee -a "$CADDYFILE" >/dev/null <<EOF
 
 ${DOMAIN} {
-    handle /api/* { reverse_proxy localhost:8000 }
-    handle /auth/* { reverse_proxy localhost:8000 }
-    handle /docs* { reverse_proxy localhost:8000 }
-    handle /openapi.json { reverse_proxy localhost:8000 }
-    handle /health { reverse_proxy localhost:8000 }
-    handle { reverse_proxy localhost:3000 }
+    handle /api/* {
+        reverse_proxy localhost:8000
+    }
+    handle /auth/* {
+        reverse_proxy localhost:8000
+    }
+    handle /docs* {
+        reverse_proxy localhost:8000
+    }
+    handle /openapi.json {
+        reverse_proxy localhost:8000
+    }
+    handle /health {
+        reverse_proxy localhost:8000
+    }
+    handle {
+        reverse_proxy localhost:3000
+    }
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"

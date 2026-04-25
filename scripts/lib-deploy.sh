@@ -224,12 +224,24 @@ ensure_caddy_container() {
     mkdir -p "$conf_dir"
     cat > "$conf_file" <<EOF
 ${CADDY_DOMAIN} {
-    handle /api/*       { reverse_proxy backend:8000 }
-    handle /auth/*      { reverse_proxy backend:8000 }
-    handle /docs*       { reverse_proxy backend:8000 }
-    handle /openapi.json { reverse_proxy backend:8000 }
-    handle /health      { reverse_proxy backend:8000 }
-    handle              { reverse_proxy frontend:3000 }
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle /auth/* {
+        reverse_proxy backend:8000
+    }
+    handle /docs* {
+        reverse_proxy backend:8000
+    }
+    handle /openapi.json {
+        reverse_proxy backend:8000
+    }
+    handle /health {
+        reverse_proxy backend:8000
+    }
+    handle {
+        reverse_proxy frontend:3000
+    }
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
