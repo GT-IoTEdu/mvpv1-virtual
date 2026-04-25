@@ -3,14 +3,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "jest --runInBand"
+    "test": "jest --runInBand --verbose"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0"
   },
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
-    "transform": {}
+    "transform": {},
+    "reporters": [
+      "default",
+      ["jest-junit", { "outputDirectory": ".", "outputName": "junit.xml" }]
+    ]
   }
 }

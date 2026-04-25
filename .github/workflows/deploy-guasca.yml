@@ -53,3 +53,12 @@ jobs:
         run: |
           npm install --silent
           npm test
+
+      - name: Publish test report (guasca)
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: API tests — guasca (mvp.iotedu.org)
+          path: tests/junit.xml
+          reporter: jest-junit
+          fail-on-error: true

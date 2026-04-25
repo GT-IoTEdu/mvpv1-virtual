@@ -53,3 +53,12 @@ jobs:
         run: |
           npm install --silent
           npm test
+
+      - name: Publish test report (a9)
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: API tests — a9 (iotedu.anonshield.org)
+          path: tests/junit.xml
+          reporter: jest-junit
+          fail-on-error: true
