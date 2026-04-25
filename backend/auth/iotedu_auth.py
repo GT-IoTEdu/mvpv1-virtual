@@ -121,12 +121,20 @@ async def login(request: Request):
     _ensure_configured()
     if not REDIRECT_URI:
         raise HTTPException(status_code=503, detail="IOTEDU_REDIRECT_URI not set")
+    stale = [k for k in list(request.session.keys()) if k.startswith("_state_iotedu_")]
+    for k in stale:
+        request.session.pop(k, None)
+    if stale:
+        logger.info("OIDC iotedu login: cleared %d stale state(s)", len(stale))
     return await oauth.iotedu.authorize_redirect(request, REDIRECT_URI)
 
 
 @router.get("/callback", summary="Callback OIDC")
 async def callback(request: Request):
     _ensure_configured()
+    state_keys = [k for k in request.session.keys() if k.startswith("_state_iotedu_")]
+    logger.info("OIDC iotedu callback: state in URL=%s; session has %d state(s): %s",
+                request.query_params.get("state"), len(state_keys), state_keys)
     try:
         token = await oauth.iotedu.authorize_access_token(request)
     except OAuthError as exc:
