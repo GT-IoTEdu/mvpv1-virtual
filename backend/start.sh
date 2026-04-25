@@ -11,6 +11,7 @@ echo "Initializing database..."
 
 /opt/venv/bin/python /backend/scripts/create_institutions_simple.py
 /opt/venv/bin/python /backend/scripts/migrate_add_permission.py || true
+/opt/venv/bin/python /backend/scripts/migrate_add_keycloak_sub.py || true
 
 
 # Start backend in background

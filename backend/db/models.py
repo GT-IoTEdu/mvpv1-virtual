@@ -29,6 +29,7 @@ class User(Base):
     instituicao = Column(String(255))
     institution_id = Column(Integer, ForeignKey('institutions.id'), nullable=True, comment="ID da instituição/campus que o usuário gerencia")
     google_sub = Column(String(255), unique=True, index=True, nullable=True)
+    keycloak_sub = Column(String(255), unique=True, index=True, nullable=True)
     picture = Column(String(512), nullable=True)
     permission = Column(Enum(UserPermission), default=UserPermission.USER, nullable=False)
     ultimo_login = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -38,12 +39,13 @@ class User(Base):
     device_assignments = relationship("UserDeviceAssignment", back_populates="user", foreign_keys="[UserDeviceAssignment.user_id]")
     institution = relationship("Institution", back_populates="managers")
 
-    def __init__(self, email, nome=None, instituicao=None, permission=UserPermission.USER, google_sub=None, picture=None, is_active=True):
+    def __init__(self, email, nome=None, instituicao=None, permission=UserPermission.USER, google_sub=None, keycloak_sub=None, picture=None, is_active=True):
         self.email = email
         self.nome = nome
         self.instituicao = instituicao
         self.permission = permission
         self.google_sub = google_sub
+        self.keycloak_sub = keycloak_sub
         self.picture = picture
         self.is_active = is_active
     
@@ -87,6 +89,7 @@ class User(Base):
             'ultimo_login': self.ultimo_login.isoformat() if self.ultimo_login else None,
             'is_active': self.is_active,
             'google_sub': self.google_sub,
+            'keycloak_sub': self.keycloak_sub,
             'picture': self.picture,
             'is_admin': self.is_admin(),
             'is_manager': self.is_manager(),

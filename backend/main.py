@@ -10,6 +10,7 @@ from services_scanners.snort_router import router as snort_router
 from services_scanners.test_metrics_router import router as test_metrics_router
 from auth.cafe_auth import router as cafe_auth_router
 from auth.google_auth import router as google_auth_router
+from auth.iotedu_auth import router as iotedu_auth_router
 from auth.saml_router import router as saml_router
 from auth.admin_router import router as admin_router
 from dotenv import load_dotenv
@@ -55,6 +56,7 @@ app.include_router(snort_router, prefix="/api", tags=["Snort IDS/IPS"])
 app.include_router(test_metrics_router, tags=["Teste - Métricas"])
 app.include_router(cafe_auth_router, prefix="/api/auth/cafe", tags=["Autenticação CAFe"])
 app.include_router(google_auth_router, prefix="/api/auth", tags=["Autenticação Google OAuth2"])
+app.include_router(iotedu_auth_router, prefix="/api/auth/iotedu", tags=["Autenticação OIDC Keycloak"])
 app.include_router(saml_router, tags=["Autenticação SAML CAFe"])
 app.include_router(admin_router, prefix="/api", tags=["Autenticação Administrativa"])
 
