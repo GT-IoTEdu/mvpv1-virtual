@@ -1,0 +1,107 @@
+name: Deploy to testes (staging)
+
+# Branch staging → testes.iotedu.org. Mais rápido que main:
+# pula scans de vulnerabilidade (Trivy/Bandit/Gitleaks ficam só no main),
+# roda só smoke + pytest + jest. Trigger só quando push é na branch testes.
+
+on:
+  push:
+    branches: [testes]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-testes
+  cancel-in-progress: true   # staging pode cancelar deploy anterior
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  deploy:
+    if: github.repository == 'GT-IoTEdu/mvpv1-virtual'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar SSH (deploy key do guasca)
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GUASCA_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.GUASCA_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Sincronizar repo no guasca e disparar deploy
+        env:
+          GUASCA_HOST: ${{ secrets.GUASCA_HOST }}
+          GUASCA_USER: ${{ secrets.GUASCA_USER }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" 'mkdir -p /home/cristhian/iotedu-testes'
+          rsync -az --delete \
+                --exclude='.git' --exclude='backend/.env' --exclude='.env' \
+                --exclude='ids/logs' --exclude='.deploy.lock' \
+                -e "ssh -i $HOME/.ssh/id_ed25519" \
+                ./ "$GUASCA_USER@$GUASCA_HOST:/home/cristhian/iotedu-testes/"
+          ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \
+            'bash /home/cristhian/iotedu-testes/scripts/testes-deploy.sh'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Rodar pytest (consultivo — não bloqueia)
+        id: pytest
+        continue-on-error: true
+        env:
+          BASE_URL: https://testes.iotedu.org
+        run: |
+          pip install --quiet pytest requests
+          pytest backend/testes/test_routes.py -v 2>&1 | tee pytest-output.txt
+
+      - name: Rodar Jest (consultivo — não bloqueia)
+        id: jest
+        continue-on-error: true
+        working-directory: tests
+        env:
+          BASE_URL: https://testes.iotedu.org
+        run: |
+          npm install --silent
+          npm test 2>&1 | tee jest-output.txt
+
+      - name: Resumo dos testes
+        if: always()
+        run: |
+          {
+            echo "## Testes — testes.iotedu.org"
+            echo
+            echo "### pytest"
+            echo '```'
+            tail -50 pytest-output.txt 2>/dev/null || echo "(sem saída)"
+            echo '```'
+            echo
+            echo "### Jest"
+            echo '```'
+            tail -80 tests/jest-output.txt 2>/dev/null || echo "(sem saída)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.pytest.outcome }}" = "failure" ] || [ "${{ steps.jest.outcome }}" = "failure" ]; then
+            echo "::warning::Algum teste falhou em testes.iotedu.org. Verifique o resumo antes de mergear pra main."
+          fi
+
+      - name: Publicar relatório JUnit (aba Checks)
+        if: always() && hashFiles('tests/junit.xml') != ''
+        uses: dorny/test-reporter@v1
+        with:
+          name: API tests — testes.iotedu.org
+          path: tests/junit.xml
+          reporter: jest-junit
+          fail-on-error: false

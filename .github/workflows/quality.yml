@@ -1,13 +1,14 @@
-name: Quality & Security
+name: Qualidade & Segurança
 
-# Todos os checks são ADVISORY — falha aqui NÃO bloqueia merge nem
-# deploy. Use só pra visibilidade. O resultado aparece no summary
+# Todos os checks são CONSULTIVOS — falha aqui NÃO bloqueia merge nem
+# deploy. Use só pra visibilidade. O resultado aparece no resumo
 # do run e na aba Security do repo (Trivy → SARIF).
 
 on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * *"
@@ -19,12 +20,12 @@ permissions:
 jobs:
 
   trivy:
-    name: Trivy — vulnerabilities (advisory)
+    name: Trivy — vulnerabilidades no código (consultivo)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Trivy filesystem scan (SARIF)
+      - name: Trivy — varredura do filesystem (SARIF)
         continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
@@ -35,13 +36,13 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: '0'
-      - name: Upload SARIF to GitHub Security
+      - name: Publicar SARIF na aba Security
         if: always() && hashFiles('trivy-results.sarif') != ''
         continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
-      - name: Trivy human-readable summary
+      - name: Trivy — resumo legível
         if: always()
         continue-on-error: true
         uses: aquasecurity/trivy-action@master
@@ -54,14 +55,14 @@ jobs:
           exit-code: '0'
 
   gitleaks:
-    name: Gitleaks — secrets vazados (advisory)
+    name: Gitleaks — segredos vazados no histórico (consultivo)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run gitleaks
+      - name: Rodar gitleaks
         continue-on-error: true
         uses: gitleaks/gitleaks-action@v2
         env:

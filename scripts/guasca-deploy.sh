@@ -1,50 +1,18 @@
 #!/usr/bin/env bash
-# Deploy do app iotedu-mvp no guasca (mesmo padrão de a9-deploy.sh).
-# Usa docker compose com overlay específico do host. IDS containers
-# (zeek/suricata_ids/snort_ids) só sobem se a bridge-tap existir no
-# host — provisionada por scripts/setup-host.sh.
+# Deploy do iotedu-mvp no guasca (sem docker compose).
+# Caddy roda nativo no host → backend/frontend publicam em 127.0.0.1.
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-/home/cristhian/mvpv1-virtual}"
+PROJECT="iotedu-mvp"
+DB_VOLUME="${DB_VOLUME:-iotedu-mvp-db-data}"
+DB_PASSWORDS="$REPO_DIR/backend/.env"
+PUBLISH_HOST_PORTS="yes"         # Caddy nativo no host bate em 127.0.0.1:8000/3000
+CADDY_CONTAINER=""               # nenhum: Caddy é serviço do host
 HEALTH_URL="${HEALTH_URL:-https://mvp.iotedu.org/health}"
-COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-iotedu-mvp}"
-COMPOSE_FILES=(-f docker-compose.yml -f compose.guasca.yml)
-SERVICES=(db backend frontend sse_server)
-if ip link show bridge-tap >/dev/null 2>&1; then
-    SERVICES+=(zeek suricata_ids snort_ids)
-fi
+IDS_ENABLED="${IDS_ENABLED:-auto}"
 
-cd "$REPO_DIR"
+# shellcheck source=lib-deploy.sh
+source "$(dirname "$0")/lib-deploy.sh"
 
-exec 9>"$REPO_DIR/.deploy.lock"
-flock -n 9 || { echo "deploy already in progress" >&2; exit 1; }
-
-# Garante cron de backup do MySQL (idempotente)
-BACKUP_LINE="0 3 * * * MYSQL_CONTAINER=${COMPOSE_PROJECT_NAME}-db-1 $REPO_DIR/scripts/backup-mysql.sh >> $REPO_DIR/.backup.log 2>&1"
-if ! crontab -l 2>/dev/null | grep -qF "$REPO_DIR/scripts/backup-mysql.sh"; then
-    (crontab -l 2>/dev/null; echo "$BACKUP_LINE") | crontab -
-    echo "cron de backup instalado"
-fi
-
-export COMPOSE_PROJECT_NAME
-
-docker compose "${COMPOSE_FILES[@]}" up -d --build "${SERVICES[@]}"
-docker image prune -f >/dev/null
-
-for _ in $(seq 1 30); do
-    if curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
-        break
-    fi
-    sleep 2
-done
-
-if ! curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
-    echo "deploy: health probe failed for $HEALTH_URL" >&2
-    docker compose "${COMPOSE_FILES[@]}" ps
-    docker compose "${COMPOSE_FILES[@]}" logs --tail=40 backend
-    exit 1
-fi
-
-# Smoke test: bate em todos os endpoints críticos. Falha aqui = deploy falhou.
-BASE_URL="${HEALTH_URL%/health}"
-bash "$REPO_DIR/scripts/smoke-test.sh" "$BASE_URL"
+deploy
