@@ -38,7 +38,7 @@ jobs:
       - name: Upload SARIF to GitHub Security
         if: always() && hashFiles('trivy-results.sarif') != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
       - name: Trivy human-readable summary
@@ -152,7 +152,7 @@ jobs:
       - name: Upload SARIF
         if: always() && hashFiles(format('trivy-{0}.sarif', matrix.name)) != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-${{ matrix.name }}.sarif
           category: image-${{ matrix.name }}
