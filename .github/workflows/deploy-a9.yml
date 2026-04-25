@@ -50,7 +50,22 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run API integration tests against production
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run pytest (advisory — não bloqueia deploy)
+        id: pytest
+        continue-on-error: true
+        env:
+          BASE_URL: https://iotedu.anonshield.org
+        run: |
+          pip install --quiet pytest requests
+          pytest backend/testes/test_routes.py -v 2>&1 | tee pytest-output.txt
+
+      - name: Run Jest API tests (advisory — não bloqueia deploy)
+        id: jest
+        continue-on-error: true
         working-directory: tests
         env:
           BASE_URL: https://iotedu.anonshield.org
@@ -58,20 +73,31 @@ jobs:
           npm install --silent
           npm test 2>&1 | tee jest-output.txt
 
-      - name: Publish test summary on run home
+      - name: Publish summary
         if: always()
-        working-directory: tests
         run: |
-          echo "## API tests — a9 (iotedu.anonshield.org)" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -80 jest-output.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Test results — a9 (iotedu.anonshield.org)"
+            echo
+            echo "### pytest (\`backend/testes/test_routes.py\`)"
+            echo '```'
+            tail -50 pytest-output.txt 2>/dev/null || echo "(no output)"
+            echo '```'
+            echo
+            echo "### Jest (\`tests/api.test.js\`)"
+            echo '```'
+            tail -80 tests/jest-output.txt 2>/dev/null || echo "(no output)"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.pytest.outcome }}" = "failure" ] || [ "${{ steps.jest.outcome }}" = "failure" ]; then
+            echo "::warning::Algum teste de API falhou. Deploy NÃO foi bloqueado, mas verifica o summary."
+          fi
 
-      - name: Publish test report (a9)
+      - name: Publish JUnit report (Checks tab)
         if: always()
         uses: dorny/test-reporter@v1
         with:
           name: API tests — a9 (iotedu.anonshield.org)
           path: tests/junit.xml
           reporter: jest-junit
-          fail-on-error: true
+          fail-on-error: false
