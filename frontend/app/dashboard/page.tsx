@@ -2563,9 +2563,8 @@ export default function DashboardPage() {
 
       {/* Body */}
       <div className="flex">
-        {/* Sidebar */}
-        {/* EXCLUIR A SIDE-BAR */}
-        <aside className="w-64 bg-slate-800 min-h-[calc(100vh-80px)] border-r border-slate-700 p-4">
+        {/* Sidebar — desktop only; nav em mobile fica nas tabs do main */}
+        <aside className="hidden md:block w-64 bg-slate-800 min-h-[calc(100vh-80px)] border-r border-slate-700 p-4">
           <nav className="space-y-1">
             <div className="px-4 py-3 rounded-md bg-slate-700/60 border-l-4 border-cyan-400 text-cyan-300">📊 Dashboard</div>
             {permission !== "ADMIN" && (

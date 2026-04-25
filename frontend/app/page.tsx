@@ -131,7 +131,7 @@ export default function GTIoTEDULanding() {
             </div>
           </Badge>
 
-          <h1 className="text-6xl md:text-8xl font-bold mb-8">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-8">
             <span className="text-white">GT IoT</span>
             <br />
             <span className="bg-gradient-to-r from-blue-400 via-green-400 to-blue-600 bg-clip-text text-transparent">
