@@ -178,25 +178,28 @@ export default function GTIoTEDULanding() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
-            >
-              Explore a Plataforma
-              <svg
-                className="w-5 h-5 ml-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </Button>
+                Explore a Plataforma
+                <svg
+                  className="w-5 h-5 ml-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -617,13 +620,15 @@ export default function GTIoTEDULanding() {
                   </div>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-                >
-                  Saiba Mais sobre a Parceria
-                  <Network className="w-5 h-5 ml-2" />
-                </Button>
+                <a href="#apoio">
+                  <Button
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+                  >
+                    Saiba Mais sobre a Parceria
+                    <Network className="w-5 h-5 ml-2" aria-hidden="true" />
+                  </Button>
+                </a>
               </CardContent>
             </Card>
           </div>
