@@ -38,7 +38,9 @@ build_app_image() {
 }
 
 build_ids_image() {
-    local svc="$1" ctx="$2" tag="${PROJECT}/${svc}:latest"
+    local svc="$1"
+    local ctx="$2"
+    local tag="${PROJECT}/${svc}:latest"
     if [ "${IDS_FORCE_BUILD:-no}" != "yes" ] && docker image inspect "$tag" >/dev/null 2>&1; then
         log "$svc: imagem já existe, pulando build (IDS_FORCE_BUILD=yes pra forçar)"
         return
@@ -151,13 +153,15 @@ run_sse() {
 
 # --- IDS (host network, privileged) -------------------------------------
 run_ids() {
-    [ "$IDS_ENABLED" = "yes" ] || { log "IDS desativado"; return 0; }
-
     local zeek="${PROJECT}-zeek-1"
     local sur="${PROJECT}-suricata_ids-1"
     local sno="${PROJECT}-snort_ids-1"
 
+    # Sempre limpa containers antigos de IDS — se IDS for "no" agora
+    # mas estavam rodando antes, eles ficam restartando sem bridge-tap.
     docker rm -f "$zeek" "$sur" "$sno" >/dev/null 2>&1 || true
+
+    [ "$IDS_ENABLED" = "yes" ] || { log "IDS desativado (containers antigos removidos se houvesse)"; return 0; }
 
     log "zeek: $zeek"
     docker run -d --name "$zeek" \
