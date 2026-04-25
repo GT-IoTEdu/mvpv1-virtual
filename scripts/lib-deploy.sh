@@ -217,16 +217,19 @@ ensure_backup_cron() {
 }
 
 # --- saúde + smoke ------------------------------------------------------
+# Window de 5min: backend roda migrations no boot, Caddy pode estar emitindo
+# cert TLS pela primeira vez (ACME challenge), DNS pode estar propagando.
+# 150 tentativas × 2s = 5min.
 wait_health() {
     log "sondando $HEALTH_URL"
-    for _ in $(seq 1 30); do
+    for _ in $(seq 1 150); do
         if curl -fsS --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
             log "health: OK"
             return 0
         fi
         sleep 2
     done
-    log "ERRO: $HEALTH_URL não respondeu 200"
+    log "ERRO: $HEALTH_URL não respondeu 200 em 5min"
     docker ps --format 'table {{.Names}}\t{{.Status}}' | grep "${PROJECT}-" || true
     docker logs --tail=40 "${PROJECT}-backend-1" || true
     return 1
