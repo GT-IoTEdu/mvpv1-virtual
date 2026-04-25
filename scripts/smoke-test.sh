@@ -34,7 +34,7 @@ probe() {
 probe_redirect_to() {
     local desc="$1" url="$2" want_host="$3"
     local target
-    target=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 10 "$url" 2>/dev/null || echo "")
+    target=$(curl -sS "${RESOLVE_ARGS[@]}" -o /dev/null -w '%{redirect_url}' --max-time 10 "$url" 2>/dev/null || echo "")
     if [[ "$target" == *"$want_host"* ]]; then
         printf '  \033[32m✓\033[0m %-40s -> %s\n' "$desc" "$want_host"
     else
