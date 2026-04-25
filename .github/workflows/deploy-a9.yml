@@ -9,6 +9,10 @@ concurrency:
   group: deploy-a9
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   deploy:
     if: github.repository == 'GT-IoTEdu/mvpv1-virtual'
@@ -52,7 +56,16 @@ jobs:
           BASE_URL: https://iotedu.anonshield.org
         run: |
           npm install --silent
-          npm test
+          npm test 2>&1 | tee jest-output.txt
+
+      - name: Publish test summary on run home
+        if: always()
+        working-directory: tests
+        run: |
+          echo "## API tests — a9 (iotedu.anonshield.org)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -80 jest-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Publish test report (a9)
         if: always()
