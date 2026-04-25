@@ -8,7 +8,7 @@ mysqlclient
 PyJWT==2.8.0
 
 # Dependências para SAML CAFe
-django==4.2.23
+django==6.0.4
 djangosaml2==1.5.7
 pysaml2==7.4.1
 cryptography==41.0.7
