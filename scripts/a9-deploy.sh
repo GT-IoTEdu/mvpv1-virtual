@@ -5,7 +5,7 @@ REPO_DIR="${REPO_DIR:-/home/cristhian/wticifes2026-iotedu}"
 HEALTH_URL="${HEALTH_URL:-https://iotedu.anonshield.org/health}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-iotedu-anonshield}"
 COMPOSE_FILES=(-f docker-compose.yml -f compose.a9.yml)
-SERVICES=(db backend frontend)
+SERVICES=(db backend frontend sse_server zeek suricata_ids snort_ids)
 
 cd "$REPO_DIR"
 

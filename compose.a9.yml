@@ -17,5 +17,15 @@ services:
   frontend:
     ports: !reset []
 
+  sse_server:
+    build: ./ids/ids_log_monitor
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8001:8001"
+    volumes:
+      - ./ids/logs:/ids/logs:ro
+    restart: unless-stopped
+
 volumes:
   iotedu_db_data:
