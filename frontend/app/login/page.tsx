@@ -260,13 +260,13 @@ export default function LoginPage() {
       {/* Conteúdo principal centralizado */}
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="text-center mb-10">
-          {/* Removido o h1 com "Login - GT-IoT EDU" */}
+          {/* Removido o h1 com "Login - GT IoT-Edu" */}
           <div className="flex items-center justify-center space-x-3">
             <div className="relative">
               <Wifi className="h-10 w-10 text-blue-400" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <span className="text-4xl font-bold text-blue-400">GT IoT EDU</span>
+            <span className="text-4xl font-bold text-blue-400">GT IoT-Edu</span>
           </div>
         </div>
 

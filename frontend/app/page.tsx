@@ -47,7 +47,7 @@ export default function GTIoTEDULanding() {
             <Wifi className="h-8 w-8 text-blue-400" />
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
           </div>
-          <span className="text-xl font-bold">GT IoT EDU</span>
+          <span className="text-xl font-bold">GT IoT-Edu</span>
         </div>
 
         <div className="hidden md:flex items-center space-x-8">
@@ -575,7 +575,7 @@ export default function GTIoTEDULanding() {
                 </p>
                 <p className="text-slate-300 mb-8 text-lg leading-relaxed">
                   Parceria estratégica com a RNP para desenvolvimento e
-                  implementação da plataforma GT IoT EDU, aproveitando a
+                  implementação da plataforma GT IoT-Edu, aproveitando a
                   infraestrutura nacional de rede acadêmica para conectar
                   dispositivos IoT de forma segura e eficiente em instituições
                   de ensino superior.
@@ -855,7 +855,7 @@ export default function GTIoTEDULanding() {
               <Wifi className="h-6 w-6 text-blue-400" />
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <span className="text-lg font-bold">GT IoT EDU</span>
+            <span className="text-lg font-bold">GT IoT-Edu</span>
           </div>
           <p className="text-slate-400 text-sm">
             © 2025 GT-IoTEDU Todos os direitos reservados.
