@@ -23,10 +23,6 @@ services:
       - ./ids/logs:/ids/logs:ro
     restart: unless-stopped
 
-  zeek:
-    environment:
-      ZEEK_INTERFACE: bridge-tap
-      ZEEK_DISABLE_METRICS: "1"
 
 volumes:
   iotedu_db_data:
