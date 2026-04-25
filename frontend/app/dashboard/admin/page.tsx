@@ -155,26 +155,29 @@ export default function AdminDashboardPage() {
 
   // Função de logout
   const handleLogout = useCallback(async () => {
-    // Tentar chamar endpoint de logout no backend (ignorar erros silenciosamente)
+    let provider = "google";
     try {
-      await fetch(`${API_BASE}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      }).catch(() => {
-        // Ignorar erros de rede silenciosamente
-      });
-    } catch {
-      // Ignorar qualquer erro
-    }
+      const stored = JSON.parse(localStorage.getItem("auth:user") || "{}");
+      provider = stored.provider || "google";
+    } catch {}
 
-    // Limpar dados do localStorage
     try {
       localStorage.removeItem("auth:user");
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_info");
-    } catch {
-      // Ignorar erros ao limpar localStorage
+    } catch {}
+
+    if (provider === "iotedu") {
+      window.location.href = "/api/auth/iotedu/logout";
+      return;
     }
+
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      }).catch(() => {});
+    } catch {}
 
     // Redirecionar para login
     router.push("/login");

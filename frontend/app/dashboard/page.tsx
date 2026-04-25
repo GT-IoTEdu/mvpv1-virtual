@@ -2540,11 +2540,18 @@ export default function DashboardPage() {
           <button
             className="ml-2 px-3 py-1.5 rounded-md bg-rose-600/90 hover:bg-rose-600 text-white text-sm"
             onClick={async () => {
+              let provider = "google";
+              try {
+                const stored = JSON.parse(window.localStorage.getItem("auth:user") || "{}");
+                provider = stored.provider || "google";
+              } catch {}
+              try { window.localStorage.removeItem("auth:user"); } catch {}
+              if (provider === "iotedu") {
+                window.location.href = "/api/auth/iotedu/logout";
+                return;
+              }
               try {
                 await apiFetch("/api/auth/logout", { method: "POST", credentials: "include" });
-              } catch {}
-              try {
-                window.localStorage.removeItem("auth:user");
               } catch {}
               router.push("/login");
             }}
