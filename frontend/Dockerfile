@@ -23,10 +23,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install -r requirements.txt
 
-# Install frontend dependencies
- 
+# Install frontend dependencies + build at image-build time so container
+# boot is fast (was ~60s for `npm run build` at start, now ~5s).
 RUN npm install --legacy-peer-deps
-
-  
+RUN npm run build
 
 CMD ["/bin/bash","/frontend/start.sh"]
