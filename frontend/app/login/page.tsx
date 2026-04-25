@@ -15,7 +15,7 @@ const authPath = (path: string): string => (API_BASE ? `${API_BASE}${path}` : pa
 // é o único lugar que precisa mudar pra habilitar/ocultar uma opção
 // na tela de login.
 const PROVIDERS_ENABLED = {
-  cafe: true,
+  cafe: false,
   google: true,
   iotedu: true,
   anonshield: true,
@@ -269,13 +269,13 @@ export default function LoginPage() {
       {/* Conteúdo principal centralizado */}
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="text-center mb-10">
-          {/* Removido o h1 com "Login - GT IoT-Edu" */}
+          {/* Removido o h1 com "Login - GT IoTEdu" */}
           <div className="flex items-center justify-center space-x-3">
             <div className="relative">
               <Wifi className="h-10 w-10 text-blue-400" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <span className="text-4xl font-bold text-blue-400">GT IoT-Edu</span>
+            <span className="text-4xl font-bold text-blue-400">GT IoTEdu</span>
           </div>
         </div>
 
@@ -305,7 +305,7 @@ export default function LoginPage() {
           {/* OAuth/OIDC — card secundário, agrupa Google + IdPs */}
           <Card className="border border-slate-700 bg-slate-800/40 p-6">
             <h2 className="text-base font-medium text-slate-300 mb-5 text-center">
-              Ou entre por outra conta
+              
             </h2>
 
           <div className="space-y-3">

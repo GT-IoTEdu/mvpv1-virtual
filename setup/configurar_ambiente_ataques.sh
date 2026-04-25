@@ -1,9 +1,9 @@
 #!/bin/bash
-sudo ip link add bridge-tap type bridge
-sudo ip link set bridge-tap up
-sudo ip tuntap add dev tap0 mode tap
-sudo ip link set tap0 master bridge-tap
-sudo ip link set tap0 up
+#sudo ip link add bridge-tap type bridge
+#sudo ip link set bridge-tap up
+#sudo ip tuntap add dev tap0 mode tap
+#sudo ip link set tap0 master bridge-tap
+#sudo ip link set tap0 up
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Get the parent directory
 PARENT_DIR="$(dirname "$SCRIPT_DIR")"

@@ -2505,7 +2505,7 @@ export default function DashboardPage() {
 
       {/* COMPONENTIZAR A HEADER */}
       <header className="h-20 px-6 flex items-center justify-between bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 shadow-lg">
-        <div className="text-xl font-bold">IoT-Edu</div>
+        <div className="text-xl font-bold">IoTEdu</div>
         <div className="flex items-center gap-3">
           {(institutionName || institutionCity) && (
             <div className="text-xs text-slate-300 bg-slate-700/50 px-3 py-1 rounded-md border border-slate-600">
