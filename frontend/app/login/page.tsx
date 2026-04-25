@@ -279,24 +279,36 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Login Options — single card, hierarchical buttons (Hick + Gestalt proximity) */}
-        <Card className="w-full max-w-md border border-slate-700 bg-slate-800/40 p-6">
-          <h2 className="text-base font-medium text-slate-300 mb-5 text-center">
-            Escolha como entrar
-          </h2>
+        <div className="w-full max-w-md space-y-6">
 
-          <div className="space-y-3">
-            {/* Primário: CAFe (login institucional, caminho canônico) */}
-            {PROVIDERS_ENABLED.cafe && (
+          {/* CAFe — card grande institucional (estilo padrão das federações) */}
+          {PROVIDERS_ENABLED.cafe && (
+            <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
+              <div className="mb-4">
+                <Image
+                  src="/images/cafe-logo.png"
+                  alt="CAFe — Comunidade Acadêmica Federada"
+                  width={240}
+                  height={80}
+                  className="mx-auto"
+                />
+              </div>
               <Button
-                className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white h-11"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => alert("Redirecionando para autenticação CAFe...")}
               >
-                <Image src="/images/cafe-logo.png" alt="" aria-hidden="true" width={20} height={20} className="mr-3" />
-                Continuar com CAFe (institucional)
+                Clique aqui para acessar pelo login institucional
               </Button>
-            )}
+            </Card>
+          )}
 
+          {/* OAuth/OIDC — card secundário, agrupa Google + IdPs */}
+          <Card className="border border-slate-700 bg-slate-800/40 p-6">
+            <h2 className="text-base font-medium text-slate-300 mb-5 text-center">
+              Ou entre por outra conta
+            </h2>
+
+          <div className="space-y-3">
             {PROVIDERS_ENABLED.google && (
               <Button
                 variant="outline"
@@ -333,7 +345,7 @@ export default function LoginPage() {
                 onClick={() => handleIdpLogin("anonshield")}
                 disabled={idpLoadingProvider !== null || isLoading}
               >
-                <Image src="/idp-anonshield.webp" alt="" aria-hidden="true" width={20} height={20} className="mr-3" />
+                <Image src="/idp-anonshield.svg" alt="" aria-hidden="true" width={20} height={20} className="mr-3" />
                 {idpLoadingProvider === "anonshield" ? "Conectando..." : "Continuar com IdP AnonShield"}
               </Button>
             )}
@@ -367,7 +379,8 @@ export default function LoginPage() {
               </button>
             </div>
           )}
-        </Card>
+          </Card>
+        </div>
 
         {/* Footer */}
         <div className="mt-10 text-center">
