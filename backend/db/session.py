@@ -12,7 +12,16 @@ except ImportError:  # fallback quando executado a partir do backend diretamente
 # Configuração do banco de dados MySQL
 DATABASE_URL = f"mysql+pymysql://{config.MYSQL_USER}:{config.MYSQL_PASSWORD}@{config.MYSQL_HOST}/{config.MYSQL_DB}"
 
-engine = create_engine(DATABASE_URL, echo=False)
+# pool_pre_ping: SQLAlchemy testa cada conexão do pool antes de usar e
+# descarta as mortas (MySQL fecha idle após wait_timeout, default 8h).
+# Sem isso, /health degrada após 8h+ uptime com BrokenPipeError.
+# pool_recycle: força reciclagem antes do servidor cortar.
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_pre_ping=True,
+    pool_recycle=3600,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @contextmanager
