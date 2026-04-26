@@ -86,18 +86,26 @@ if ! VBoxManage list vms 2>/dev/null | grep -qE "^\"$VM_NAME\""; then
     mkdir -p "$PFSENSE_DIR/vms"
     VBoxManage import "$OVA_FILE" --vsys 0 --vmname "$VM_NAME" \
         --basefolder "$PFSENSE_DIR/vms"
-    # NIC 1 vai pro bridge-tap (sniffing). NIC 2/3 vêm da OVA bridgeados
-    # numa interface da máquina que importou — em outro host, essa
-    # interface não existe e o startvm falha. Desabilita.
+    # NIC 1 bridgeada em tap0 (não em bridge-tap). vboxnetflt do
+    # VirtualBox tem comportamento quebrado quando o adapter alvo é
+    # uma Linux bridge — bridge-tap fica NO-CARRIER e nada flui. Em
+    # interfaces "regulares" (tap0 é tap) funciona OK. Como tap0 já é
+    # member de bridge-tap (criado pelo iotedu-bridge-tap.service), o
+    # tráfego entra na bridge via Linux bridging e os IDS vêem normal.
+    # NIC 2/3 vêm da OVA bridgeados numa interface da máquina que
+    # exportou — desativa pra não falhar startvm em hosts diferentes.
     VBoxManage modifyvm "$VM_NAME" \
-        --nic1 bridged --bridgeadapter1 bridge-tap --nicpromisc1 allow-all \
+        --nic1 bridged --bridgeadapter1 tap0 --nicpromisc1 allow-all \
         --nic2 none --nic3 none \
         --rtcuseutc on
 else
     log "VM '$VM_NAME' already imported"
-    # Garante que NICs extras estão desabilitadas mesmo em VMs já
-    # importadas em versões antigas do script (idempotente).
-    VBoxManage modifyvm "$VM_NAME" --nic2 none --nic3 none 2>/dev/null || true
+    # Idempotente: garante NICs extras desativadas e bridgeadapter
+    # correto mesmo em VMs importadas com versões antigas do script
+    # (que apontavam pra bridge-tap em vez de tap0).
+    VBoxManage modifyvm "$VM_NAME" \
+        --nic1 bridged --bridgeadapter1 tap0 --nicpromisc1 allow-all \
+        --nic2 none --nic3 none 2>/dev/null || true
 fi
 
 #--- 4. systemd unit for VM autostart -------------------------------------
