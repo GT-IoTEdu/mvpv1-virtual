@@ -41,6 +41,8 @@ jobs:
           rsync -az --delete \
                 --exclude='.git' --exclude='backend/.env' --exclude='.env' \
                 --exclude='ids/logs' --exclude='.deploy.lock' \
+                --exclude='venv' --exclude='__pycache__' --exclude='node_modules' \
+                --exclude='.next' --exclude='backups' \
                 -e "ssh -i $HOME/.ssh/id_ed25519" \
                 ./ "$GUASCA_USER@$GUASCA_HOST:/home/cristhian/mvpv1-virtual/"
           ssh -i ~/.ssh/id_ed25519 "$GUASCA_USER@$GUASCA_HOST" \

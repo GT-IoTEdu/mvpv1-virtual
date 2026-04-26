@@ -105,7 +105,7 @@ def _provision_user(db, claims: dict, request: Request) -> User:
         user = User(
             email=email,
             nome=name,
-            instituicao="IoT-Edu" if is_admin else None,
+            instituicao="IoTEdu" if is_admin else None,
             permission=UserPermission.SUPERUSER if is_admin else UserPermission.USER,
             keycloak_sub=sub,
             picture=picture,
@@ -125,7 +125,7 @@ def _provision_user(db, claims: dict, request: Request) -> User:
         if is_admin and user.permission != UserPermission.SUPERUSER:
             user.permission = UserPermission.SUPERUSER
             if not user.instituicao:
-                user.instituicao = "IoT-Edu"
+                user.instituicao = "IoTEdu"
 
     user.ultimo_login = datetime.utcnow()
     db.add(user)

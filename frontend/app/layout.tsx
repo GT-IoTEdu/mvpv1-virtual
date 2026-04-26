@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GT IoT-Edu - Plataforma de Internet das Coisas para Educação",
+  title: "GT IoTEdu - Plataforma de Internet das Coisas para Educação",
   description: "Uma plataforma educacional para Internet das Coisas em parceria com a RNP",
 };
 
