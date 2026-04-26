@@ -143,6 +143,14 @@ testes.iotedu.org        a9 + guasca (paralelo)
 
 ## 9. Setup-host idempotente
 
-`scripts/setup-host.sh` provisiona uma máquina nova em uma execução: docker,
-módulos do VirtualBox, OVA do bridge-tap, systemd unit. Idempotente — pode
+`scripts/setup-host.sh` provisiona uma máquina nova em uma execução: módulos
+do VirtualBox, bridge-tap + tap0, OVA pfSense, systemd unit. Idempotente — pode
 rodar de novo sem efeito colateral.
+
+> **Nota técnica sobre o bridging da VM**: a NIC 1 da VM pfSense é bridgeada
+> em `tap0` (não em `bridge-tap`). O `vboxnetflt` do VirtualBox **não funciona
+> bem com Linux bridges** — o adapter fica NO-CARRIER e nenhum tráfego flui.
+> Em interfaces "normais" como `tap0` (que é uma TAP interface), funciona OK.
+> Como `tap0` já é member de `bridge-tap` (configurado pelo systemd unit
+> `iotedu-bridge-tap.service`), o tráfego sobe pra bridge via Linux bridging
+> nativo e os containers IDS escutam tudo normalmente.
