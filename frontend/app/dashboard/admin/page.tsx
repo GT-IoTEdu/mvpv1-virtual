@@ -50,6 +50,7 @@ export default function AdminDashboardPage() {
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
   const [userFromStorage, setUserFromStorage] = useState<UserFromStorage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [myInstitution, setMyInstitution] = useState<Institution | null>(null);
   const [loadingInstitution, setLoadingInstitution] = useState(false);
@@ -81,26 +82,25 @@ export default function AdminDashboardPage() {
       try {
         const response = await fetch(`${API_BASE}/admin/info`, { credentials: "include" });
         if (!response.ok) {
+          setIsAuthorized(false);
+          setLoading(false);
           router.push("/login");
           return;
         }
         const data = await response.json();
         setAdminInfo(data.admin_info);
+        setIsAuthorized(true);
       } catch (error) {
         console.error("Erro ao verificar acesso administrativo:", error);
+        setIsAuthorized(false);
         router.push("/login");
+      } finally {
+        setLoading(false);
       }
     };
 
     checkAdminAccess();
   }, [API_BASE, router]);
-
-  // Carregar dados iniciais
-  useEffect(() => {
-    if (adminInfo || userFromStorage) {
-      setLoading(false);
-    }
-  }, [adminInfo, userFromStorage]);
 
   // Carregar dados da rede atribuída ao admin (apenas para ADMIN ou MANAGER, não SUPERUSER)
   useEffect(() => {
@@ -208,6 +208,11 @@ export default function AdminDashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // Nunca renderiza conteúdo administrativo sem sessão válida.
+  if (!isAuthorized) {
+    return null;
   }
 
   if (error) {

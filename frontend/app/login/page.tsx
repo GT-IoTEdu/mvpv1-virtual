@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Wifi, ArrowLeft, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "").trim();
@@ -24,6 +25,7 @@ const PROVIDERS_ENABLED = {
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const cafeEnabled = PROVIDERS_ENABLED.cafe;
   const [idpLoadingProvider, setIdpLoadingProvider] = useState<string | null>(null);
   const popupRef = useRef<Window | null>(null);
   const gotMessageRef = useRef(false);
@@ -275,33 +277,11 @@ export default function LoginPage() {
               <Wifi className="h-10 w-10 text-blue-400" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <span className="text-4xl font-bold text-blue-400">GT IoTEdu</span>
+            <span className="text-4xl font-bold text-blue-400">GT IoTEdu MVP1</span>
           </div>
         </div>
 
         <div className="w-full max-w-md space-y-6">
-
-          {/* CAFe — card grande institucional (estilo padrão das federações) */}
-          {PROVIDERS_ENABLED.cafe && (
-            <Card className="border border-slate-700 bg-slate-800/30 p-4 text-center">
-              <div className="mb-4">
-                <Image
-                  src="/images/cafe-logo.png"
-                  alt="CAFe — Comunidade Acadêmica Federada"
-                  width={240}
-                  height={80}
-                  className="mx-auto"
-                />
-              </div>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => { window.location.href = authPath("/api/auth/cafe/login"); }}
-              >
-                Clique aqui para acessar pelo login institucional
-              </Button>
-            </Card>
-          )}
-
           {/* OAuth/OIDC — card secundário, agrupa Google + IdPs */}
           <Card className="border border-slate-700 bg-slate-800/40 p-6">
             <h2 className="text-base font-medium text-slate-300 mb-5 text-center">
@@ -309,6 +289,40 @@ export default function LoginPage() {
             </h2>
 
           <div className="space-y-3">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0} className="w-full">
+                    <Button
+                      variant="outline"
+                      disabled={!cafeEnabled}
+                      className="w-full justify-start border-slate-600 bg-slate-800/60 text-slate-100 hover:bg-slate-700 h-11 disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={() => {
+                        if (cafeEnabled) {
+                          window.location.href = authPath("/api/auth/cafe/login");
+                        }
+                      }}
+                    >
+                      <Image
+                        src="/images/cafe-logo.png"
+                        alt=""
+                        aria-hidden="true"
+                        width={20}
+                        height={20}
+                        className="mr-3 object-contain"
+                      />
+                      Continuar com CAFe
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!cafeEnabled && (
+                  <TooltipContent>
+                    Opção desabilitada temporariamente (aguardando homologação)
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+
             {PROVIDERS_ENABLED.google && (
               <Button
                 variant="outline"
@@ -388,7 +402,7 @@ export default function LoginPage() {
             Aviso de Privacidade
           </Link>
           <p className="text-xs text-slate-500 mt-2">
-            © 2025 GT-IoTEDU Todos os direitos reservados.
+            © 2026 GT-IoTEdu Todos os direitos reservados.
           </p>
         </div>
       </main>

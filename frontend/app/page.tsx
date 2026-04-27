@@ -1,4 +1,4 @@
-import { Wifi, Bluetooth, Radio, Satellite } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ export default function GTIoTEDULanding() {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <nav className="flex items-center justify-between px-6 py-4 bg-slate-900/95 backdrop-blur-sm fixed w-full top-0 z-50">
-        <span className="text-xl font-bold">GT IoTEdu Beta </span>
+        <span className="text-xl font-bold">GT IoTEdu Beta MVP1</span>
         <Link href="/login">
           <Button
             variant="outline"
@@ -20,15 +20,24 @@ export default function GTIoTEDULanding() {
 
       <section className="pt-24 pb-16 px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-6xl mx-auto text-center">
-          <a
-            href="https://gt-iotedu.github.io/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Badge className="mb-8 bg-blue-600/20 text-blue-300 border-blue-500/30 px-4 py-2 hover:bg-blue-600/30 cursor-pointer transition-colors">
-              Landing Page
-            </Badge>
-          </a>
+          <div className="mb-10 flex justify-center">
+            <a
+              href="https://gt-iotedu.github.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <div className="rounded-xl border border-blue-500/40 bg-blue-500/10 px-5 py-4 shadow-lg shadow-blue-900/30 transition-all duration-200 hover:bg-blue-500/20 hover:scale-[1.01]">
+                <Badge className="mb-2 bg-blue-600/20 text-blue-300 border-blue-500/30 px-4 py-2">
+                  Link oficial
+                </Badge>
+                <div className="flex items-center justify-center gap-2 text-base md:text-lg font-semibold text-blue-200">
+                  Landing Page oficial do projeto
+                  <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </div>
+            </a>
+          </div>
 
           <h1 className="text-6xl md:text-8xl font-bold mb-8">
             <span className="text-white">GT IoT</span>
@@ -56,24 +65,6 @@ export default function GTIoTEDULanding() {
             .
           </p>
 
-          <div className="flex justify-center items-center space-x-8 mb-12 opacity-60">
-            <div className="flex items-center space-x-2">
-              <Wifi className="w-6 h-6 text-blue-400" />
-              <span className="text-sm text-slate-400">WiFi</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Bluetooth className="w-6 h-6 text-blue-400" />
-              <span className="text-sm text-slate-400">Bluetooth</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Radio className="w-6 h-6 text-green-400" />
-              <span className="text-sm text-slate-400">LoRa</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Satellite className="w-6 h-6 text-purple-400" />
-              <span className="text-sm text-slate-400">5G</span>
-            </div>
-          </div>
         </div>
       </section>
     </div>

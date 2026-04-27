@@ -70,6 +70,7 @@ function devicesApiBasePath(): string {
 }
 
 export default function DashboardPage() {
+  const SHOW_DEVICE_BLOCK_STATUS = false; // Temporário: ocultar apenas "Status do Dispositivo"
   const [name, setName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [picture, setPicture] = useState<string | null>(null);
@@ -4197,9 +4198,10 @@ export default function DashboardPage() {
                 {deviceDetails && (
                   <div className="space-y-4">
                     {/* Contador de Advertências */}
-                    <div className="p-4 bg-slate-900 rounded-lg">
-                      <h4 className="text-slate-200 font-medium mb-3">Status do Dispositivo</h4>
-                      {(() => {
+                    {SHOW_DEVICE_BLOCK_STATUS && (
+                      <div className="p-4 bg-slate-900 rounded-lg">
+                        <h4 className="text-slate-200 font-medium mb-3">Status do Dispositivo</h4>
+                        {(() => {
                         console.log('🔍 Verificando contador de advertências para dispositivo:', deviceDetails.id);
                         console.log('📋 feedback_history:', deviceDetails.feedback_history);
                         
@@ -4300,8 +4302,9 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         );
-                      })()}
-                    </div>
+                        })()}
+                      </div>
+                    )}
                     
                     {/* Histórico de Feedback */}
                     {deviceDetails.is_blocked && (
