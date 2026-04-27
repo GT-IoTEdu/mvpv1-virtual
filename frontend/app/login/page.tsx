@@ -6,7 +6,15 @@ import Image from "next/image";
 import { Wifi, ArrowLeft, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// Importa direto do Radix (não via @/components/ui/tooltip) — re-exports
+// por aliasing (`const X = Lib.Y`) num arquivo "use client" quebram o
+// bundler RSC do Next 15.2.4 com erro "Could not find the module ... in
+// the React Client Manifest" no `npm run build`. Importação direta evita.
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+const Tooltip = TooltipPrimitive.Root;
+const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipContent = TooltipPrimitive.Content;
 import { useRouter } from "next/navigation";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "").trim();
