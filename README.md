@@ -19,9 +19,13 @@ Este README.md está organizado nas seguintes seções:
 4. **Dependências:** Informação sobre as dependências necessárias.
 5. **Preocupações com segurança:** Lista das considerações e preocupações com a segurança.
 6. **Instalação:** Instruções para instalação e configuração do sistema.
-7. **Teste mínimo:** Instruções para a execução de um teste mínimo.
-8. **Experimentos:** Informações de replicação das reivindicações.
-9. **Licença:** Informações sobre a licença do projeto.
+7. **Guia de Demonstração:** Exploração interativa da plataforma com dados pré-configurados.
+8. **Teste mínimo:** Instruções para a execução de um teste mínimo.
+9. **Teste completo:** Instruções para a execução de testes completos.
+10. **Licença:** Informações sobre a licença do projeto.
+
+**Documentos relacionados:**
+- [**DEMO.md**](./DEMO.md) — Guia completo de demonstração da plataforma com passo-a-passo interativo dos três perfis de acesso.
 
 
 
@@ -192,6 +196,25 @@ sudo chown -R "$USER:$USER" /ids/logs/logs_snort/
 cd /ids/ids_log_monitor
 uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 ```
+
+---
+
+## 📖 Guia de Demonstração
+
+Após concluir a instalação e configuração dos passos acima, explore a plataforma através do:
+
+**[Guia Completo da Demo Online (DEMO.md)](./DEMO.md)**
+
+Este guia oferece um passo-a-passo interativo para explorar:
+- ✅ Três perfis de acesso: Superusuário, Admin e Usuários Comuns
+- ✅ Fluxos de onboarding, aprovação e bloqueio de dispositivos
+- ✅ Monitoramento em tempo real e incidentes de segurança
+- ✅ Transparência em bloqueios e auditoria
+- ✅ Ciclo de vida completo do dispositivo IoT
+
+> 💡 **Dica:** Comece com o Superusuário para entender a gestão de instituições, depois explore o Admin para operação diária, e finalize com os Usuários Comuns para ver a perspectiva do usuário final.
+
+---
 
 ## Teste mínimo
 Para realizar o teste mínimo siga as instruções em [test_min.md](https://github.com/GT-IoTEdu/wticifes2026-iotedu/blob/008b16e41dfeaf78483a0f2614b01259f7b155e5/test_min.md);
