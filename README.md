@@ -1,33 +1,82 @@
  
-# Sistema de Registro IoT com pfSense
-
-## Objetivo
-Este repositório tem como objetivo armazenar todo o código produzido, exemplificar o funcionamento prático do sistema de orquestração multi-IDS para ambientes IoT, e documentar os procedimentos de instalação, execução e reivindicações do artigo.
+# IoTEdu Core (MVPv1): Cadastro de Dispositivos e Resposta Automatizada a Incidentes em Redes IoT Institucionais
 
 ## Resumo  
-Ambientes IoT ampliam a superfície de ataque e dificultam a resposta a incidentes. O IoT-Edu orquestra múltiplos IDSs (Suricata, Snort, Zeek) em um pipeline unificado com correlação de eventos e bloqueio automatizado. Em cinco tipos de ataque (75 execuções), o sistema alcança contenção média de 5,56 s, com a latência dominada pela fase de detecção. Os resultados expõem um compromisso entre a velocidade dos métodos baseados em assinaturas e o contexto dos baseados em comportamento, demonstrando que a orquestração multi-IDS melhora a resposta automatizada em ambientes IoT dinâmicos.
+IoTEdu Core é uma plataforma para gestão e proteção de redes IoT institucionais, com duas finalidades centrais: (i) o cadastro simplificado e acelerado de dispositivos IoT, estruturando o ciclo de vida de dispositivos em três níveis de acesso (superusuário, administrador e usuário); e (ii) a detecção e resposta automatizadas a incidentes, por meio da orquestração de múltiplos IDSs heterogêneos (Suricata, Snort e Zeek) em um pipeline unificado, com correlação de eventos e bloqueio dinâmico via pfSense.
+
+A integração dessas funcionalidades permite que decisões de contenção sejam contextualizadas com base no perfil do dispositivo, em seu responsável e na rede institucional à qual pertence, viabilizando políticas auditáveis em ambientes com alta heterogeneidade, como universidades, hospitais e infraestruturas críticas.
+
+A avaliação experimental foi conduzida em duas frentes. Na primeira, voltada à resposta a incidentes, foram considerados cinco tipos de ataque (HTTP Flood, ICMP Flood, DNS Tunneling, SSH Brute Force e SQL Injection), totalizando 75 execuções, com tempo médio de contenção de 5,56s, predominantemente determinado pela etapa de detecção. Na segunda, focada nas operações de cadastro e gestão, foram realizadas 96 execuções automatizadas de registro, liberação e bloqueio manual via interface Web, todas concluídas em menos de 1,2s.
 
 ---
 
+# 🌐 Demonstração Online
+
+A plataforma oferece uma **instância de demonstração funcional** em [https://mvp.iotedu.org/](https://mvp.iotedu.org/) com dados pré-configurados, permitindo explorar todos os recursos sem necessidade de instalação local.
+
+## 🔐 Acesso e Credenciais
+
+A demo utiliza **dois IdPs redundantes** para garantir disponibilidade:
+- **IdP IoTEdu:** `https://idp.iotedu.org`
+- **IdP AnonShield:** `https://idp.anonshield.org` (fallback)
+
+Todos os usuários compartilham a senha: **`iotedu`**
+
+| Usuário | Perfil | Descrição |
+|---------|--------|-----------|
+| `superuser@iotedu.org` | Superadmin | Gestão global de instituições, unidades e permissões |
+| `admin@iotedu.org` | Admin | Operação diária de uma unidade: aprovação, bloqueio e incidentes |
+| `user1` / `iotedu` | Usuário | Dispositivos LIBERADOS — monitoramento operacional |
+| `user2` / `iotedu` | Usuário | Dispositivos BLOQUEADOS — visualização de transparência de bloqueios |
+| `user3` / `iotedu` | Usuário | Dispositivos AGUARDANDO — novo ciclo de vida |
+| `user4` / `iotedu` | Usuário | Múltiplos estados — dois liberados e dois bloqueados |
+
+## 📊 Dados Pré-configurados
+
+A demo inclui:
+- **Instituição:** Unipampa
+- **Unidades:** Alegrete (IPs 192.168.56.10–50) e Bagé (IPs 192.168.56.60–90)
+- **Integrações:** pfSense, Zeek, Suricata, Snort com aliases e sincronização automática
+- **Ataques simulados:** PortScan, SYN Flood, ICMP Tunnel, SQL Injection, Brute Force, DDoS
+- **Estados de dispositivos:** LIBERADO, BLOQUEADO, AGUARDANDO com histórico completo
+
+## 🎯 O que Explorar
+
+**Perfil Superadmin:**
+- Dashboard administrativo com visão geral de usuários e unidades
+- Cadastro de novas instituições e unidades
+- Gerenciamento global de permissões
+
+**Perfil Admin:**
+- Lista de dispositivos com filtros por IP, MAC, status
+- Mapeamento de aliases pfSense (PASS/BLOCK)
+- Incidentes de segurança (Zeek, Suricata, Snort) com stream ativo
+- Histórico de bloqueios (administrativos vs. feedback de usuários)
+- Health check das integrações de rede
+
+**Perfil Usuário:**
+- Cadastro de novos dispositivos IoT
+- Monitoramento em tempo real
+- Transparência de bloqueios com detalhes de motivo e responsável
+- Ciclo de vida completo: AGUARDANDO → LIBERADO → BLOQUEADO
+
+Consulte o **[Guia Completo da Demo (DEMO.md)](./DEMO.md)** para passo-a-passo detalhado de cada perfil e funcionalidade.
+
+---
 # Estrutura do README.md
 
 Este README.md está organizado nas seguintes seções:
 
-1. **Título, Objetivo e Resumo:** Título do projeto, objetivo do artefato e resumo. 
-2. **Estrutura do README.md:** A presente estrutura.
-3. **Informações básicas:** Descrição dos componentes e requisitos mínimos para a execução do experimento.
-4. **Dependências:** Informação sobre as dependências necessárias.
-5. **Preocupações com segurança:** Lista das considerações e preocupações com a segurança.
-6. **Instalação:** Instruções para instalação e configuração do sistema.
-7. **Guia de Demonstração:** Exploração interativa da plataforma com dados pré-configurados.
+1. **Título e Resumo:** Título do projeto, objetivo do artefato e resumo. 
+2. **Guia de Demonstração:** Exploração interativa da plataforma com dados pré-configurados.
+3. **Estrutura do README.md:** A presente estrutura.
+4. **Informações básicas:** Descrição dos componentes e requisitos mínimos para a execução do experimento.
+5. **Dependências:** Informação sobre as dependências necessárias.
+6. **Preocupações com segurança:** Lista das considerações e preocupações com a segurança.
+7. **Instalação:** Instruções para instalação e configuração do sistema.
 8. **Teste mínimo:** Instruções para a execução de um teste mínimo.
 9. **Teste completo:** Instruções para a execução de testes completos.
 10. **Licença:** Informações sobre a licença do projeto.
-
-**Documentos relacionados:**
-- [**DEMO.md**](./DEMO.md) — Guia completo de demonstração da plataforma com passo-a-passo interativo dos três perfis de acesso.
-
-
 
  ---
 
@@ -83,8 +132,8 @@ sudo apt install -y \
 ## 🔧 Passo 1: Preparar Ambiente
 
 ```bash
-git clone https://github.com/GT-IoTEdu/wticifes2026-iotedu.git
-cd wticifes2026-iotedu
+git clone https://github.com/GT-IoTEdu/mvpv1-snapshot.git
+cd mvpv1-snapshot
 ```
   
 
@@ -104,7 +153,7 @@ python -m pip install --upgrade pip
 Antes de iniciar o sistema, é necessário configurar as credenciais OAuth do Google para permitir login na plataforma.
 
 Siga o guia detalhado no arquivo:  
-**[Configuração do Google OAuth - Passo a passo](https://github.com/GT-IoTEdu/wticifes2026-iotedu/blob/main/GOOGLE_AUTH.MD)**
+**[Configuração do Google OAuth - Passo a passo](https://github.com/GT-IoTEdu/mvpv1-snapshot/blob/main/GOOGLE_AUTH.MD)**
 
 ---
 
@@ -217,10 +266,10 @@ Este guia oferece um passo-a-passo interativo para explorar:
 ---
 
 ## Teste mínimo
-Para realizar o teste mínimo siga as instruções em [test_min.md](https://github.com/GT-IoTEdu/wticifes2026-iotedu/blob/008b16e41dfeaf78483a0f2614b01259f7b155e5/test_min.md);
+Para realizar o teste mínimo siga as instruções em [TESTE_MINIMO.md](https://github.com/GT-IoTEdu/mvpv1-virtual/blob/main/TESTE_MINIMO.md);
  
 ## Teste completo
-Para realizar o teste minimo siga as instruções em [test_complet.md](https://github.com/GT-IoTEdu/wticifes2026-iotedu/blob/008b16e41dfeaf78483a0f2614b01259f7b155e5/test_complet.md).
+Para realizar o teste minimo siga as instruções em [TESTE_COMPLETO.md](https://github.com/GT-IoTEdu/mvpv1-virtual/blob/main/TESTE_COMPLETO.md).
 ## Outras funcionalidades
 
 Como administrador, você pode:
@@ -244,6 +293,6 @@ Como administrador, você pode:
 
 ## Licença
 
-Copyright (c) 2025 RNP – National Research and Education Network (Brazil)
+Copyright (c) 2026 RNP – National Research and Education Network (Brazil)
 
 This code was developed is licensed under the terms of the BSD License. It may be freely used, modified, and distributed, including for commercial purposes, provided that this copyright notice is retained. This software is provided "as is", without any warranty, express or implied, including, but not limited to, warranties of merchantability or fitness for a particular purpose. RNP and the authors shall not be held liable for any damages or losses arising from the use of this software.
