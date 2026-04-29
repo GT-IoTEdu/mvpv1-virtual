@@ -10,7 +10,7 @@ A avaliação experimental foi conduzida em duas frentes. Na primeira, voltada �
 
 ---
 
-# 🌐 Demonstração Online
+# 🌐 Guia de Demonstração Online
 
 A plataforma oferece uma **instância de demonstração funcional** em [https://mvp.iotedu.org/](https://mvp.iotedu.org/) com dados pré-configurados, permitindo explorar todos os recursos sem necessidade de instalação local.
 
@@ -245,23 +245,6 @@ sudo chown -R "$USER:$USER" /ids/logs/logs_snort/
 cd /ids/ids_log_monitor
 uvicorn sse_server:app --host 0.0.0.0 --port 8001 --reload
 ```
-
----
-
-## 📖 Guia de Demonstração
-
-Após concluir a instalação e configuração dos passos acima, explore a plataforma através do:
-
-**[Guia Completo da Demo Online (DEMO.md)](./DEMO.md)**
-
-Este guia oferece um passo-a-passo interativo para explorar:
-- ✅ Três perfis de acesso: Superusuário, Admin e Usuários Comuns
-- ✅ Fluxos de onboarding, aprovação e bloqueio de dispositivos
-- ✅ Monitoramento em tempo real e incidentes de segurança
-- ✅ Transparência em bloqueios e auditoria
-- ✅ Ciclo de vida completo do dispositivo IoT
-
-> 💡 **Dica:** Comece com o Superusuário para entender a gestão de instituições, depois explore o Admin para operação diária, e finalize com os Usuários Comuns para ver a perspectiva do usuário final.
 
 ---
 
