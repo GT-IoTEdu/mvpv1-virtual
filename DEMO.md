@@ -25,10 +25,10 @@ Todos os usuários abaixo compartilham a mesma senha: **`iotedu`**
 |---|---|---|
 | `superuser@iotedu.org` | **Superadmin** | Gestão global: cadastro de instituições, unidades, todos os usuários do sistema |
 | `admin@iotedu.org` | **Admin** | Gestão de uma unidade específica: aprovação/bloqueio de dispositivos, incidentes, aliases pfSense, histórico |
-| `user1` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos LIBERADOS** |
-| `user2` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos BLOQUEADOS** |
-| `user3` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos em estado AGUARDANDO** |
-| `user4` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **dois dispositivos LIBERADOS e dois BLOQUEADOS** |
+| `user1@iotedu.org` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos LIBERADOS** |
+| `user2@iotedu.org` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos BLOQUEADOS** |
+| `user3@iotedu.org` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **apenas com dispositivos em estado AGUARDANDO** |
+| `user4@iotedu.org` | **User** (comum) | Cadastro e monitoramento dos próprios dispositivos IoT — **dois dispositivos LIBERADOS e dois BLOQUEADOS** |
 
 ### 📋 Formato dos Usuários Comuns para Demonstração
 
